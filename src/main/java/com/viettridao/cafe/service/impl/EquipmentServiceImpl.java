@@ -60,7 +60,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         equipment.setPurchasePrice(editEquipmentRequest.getPurchasePrice());
         equipment.setQuantity(editEquipmentRequest.getQuantity());
         equipment.setNotes(editEquipmentRequest.getNotes());
-        equipment.setPurchaseDate(editEquipmentRequest.getPurchaseDate());
+        // equipment.setPurchaseDate(editEquipmentRequest.getPurchaseDate());
 
         // Lưu lại vào DB
         equipmentRepository.save(equipment);

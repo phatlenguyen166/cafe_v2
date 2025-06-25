@@ -145,7 +145,7 @@ public class EquipmentController extends BaseController {
             updateRequest.setPurchasePrice(equipment.getPurchasePrice());
             updateRequest.setQuantity(equipment.getQuantity());
             updateRequest.setNotes(equipment.getNotes());
-            updateRequest.setPurchaseDate(equipment.getPurchaseDate());
+            // updateRequest.setPurchaseDate(equipment.getPurchaseDate());
 
             System.out.println("Equipment purchaseDate---------------: " + equipment.getPurchaseDate());
             model.addAttribute("editEquipmentRequest", updateRequest);

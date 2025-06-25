@@ -37,5 +37,5 @@ public class EditEquipmentRequest {
     @Size(max = 255, message = "Ghi chú không được quá 255 ký tự")
     private String notes;
 
-    private LocalDate purchaseDate;
+    // private LocalDate purchaseDate;
 }
