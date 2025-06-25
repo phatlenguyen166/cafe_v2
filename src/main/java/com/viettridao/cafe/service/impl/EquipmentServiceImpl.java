@@ -1,0 +1,38 @@
+package com.viettridao.cafe.service.impl;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.viettridao.cafe.dto.request.equipment.CreateEquipmentRequest;
+import com.viettridao.cafe.dto.response.equipment.EquipmentResponse;
+import com.viettridao.cafe.mapper.EquipmentMapper;
+import com.viettridao.cafe.model.EquipmentEntity;
+import com.viettridao.cafe.repository.EquipmentRepository;
+import com.viettridao.cafe.service.EquipmentService;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class EquipmentServiceImpl implements EquipmentService {
+
+    private final EquipmentRepository equipmentRepository;
+    private final EquipmentMapper equipmentMapper;
+
+    @Override
+    public List<EquipmentResponse> getAllEquipments() {
+        return equipmentRepository.findAll().stream()
+                .map(equipmentMapper::convertToDto)
+                .toList();
+    }
+
+    @Override
+    public EquipmentEntity createEquipment(CreateEquipmentRequest request) {
+        // Tạo entity mới từ request
+        EquipmentEntity equipment = equipmentMapper.convertToEntity(request);
+        return equipmentRepository.save(equipment);
+        
+    }
+
+}
