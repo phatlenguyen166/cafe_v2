@@ -143,6 +143,11 @@
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
+                    Ngày mua
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Thao tác
                   </th>
                 </tr>
@@ -188,9 +193,16 @@
                       0 VNĐ
                     </div>
                   </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div
+                      class="text-sm text-gray-900"
+                      th:text="${equipment.purchaseDate}"
+                    >
+                      2024-01-01
+                    </div>
+                  </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div class="flex items-center gap-2">
-                      <!-- Edit Button -->
                       <a
                         th:href="@{/device/edit/{id}(id=${equipment.id})}"
                         class="text-blue-600 hover:text-blue-900 transition-colors duration-200 p-2 rounded-md hover:bg-blue-50"
@@ -242,7 +254,7 @@
 
                 <!-- Empty state when no equipment -->
                 <tr th:if="${#lists.isEmpty(listEquipment)}">
-                  <td colspan="5" class="px-6 py-8 text-center">
+                  <td colspan="6" class="px-6 py-8 text-center">
                     <div class="text-gray-500">
                       <svg
                         class="mx-auto h-12 w-12 text-gray-400"

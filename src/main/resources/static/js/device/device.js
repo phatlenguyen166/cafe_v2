@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const submitBtn = document.getElementById("submitBtn");
   const quantityInput = document.getElementById("quantity");
   const totalAmountInput = document.getElementById("totalAmount");
+  const purchaseDateInput = document.getElementById("purchaseDate");
 
   // Validation functions
   function validateEquipmentName(name) {
@@ -41,6 +42,23 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (priceValue > 1000000000) {
       return { valid: false, message: "Giá mua không được quá 1 tỷ VNĐ" };
+    }
+    return { valid: true, message: "" };
+  }
+
+  function validatePurchaseDate(date) {
+    if (!date) {
+      return { valid: false, message: "Ngày mua không được để trống" };
+    }
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate > today) {
+      return {
+        valid: false,
+        message: "Ngày mua không được là ngày trong tương lai",
+      };
     }
     return { valid: true, message: "" };
   }
@@ -168,11 +186,17 @@ document.addEventListener("DOMContentLoaded", function () {
         isValid = false;
       }
 
+      // Validate purchase date
+      const dateValidation = validatePurchaseDate(purchaseDateInput.value);
+      if (!dateValidation.valid) {
+        errors.push("Ngày mua: " + dateValidation.message);
+        showValidationMessage(purchaseDateInput, false, dateValidation.message);
+        isValid = false;
+      }
+
       if (!isValid) {
         e.preventDefault();
-        alert("Vui lòng kiểm tra lại các lỗi sau:\n\n" + errors.join("\n"));
-
-        // Focus on first error field
+        // Không cần alert nữa, chỉ focus vào trường lỗi đầu tiên
         const firstErrorField = form.querySelector(".border-red-500");
         if (firstErrorField) {
           firstErrorField.focus();
@@ -194,6 +218,13 @@ document.addEventListener("DOMContentLoaded", function () {
         submitBtn.textContent = "Đang thêm...";
         submitBtn.classList.add("opacity-50", "cursor-not-allowed");
       }
+    });
+  }
+
+  if (purchaseDateInput) {
+    purchaseDateInput.addEventListener("blur", function (e) {
+      const validation = validatePurchaseDate(e.target.value);
+      showValidationMessage(e.target, validation.valid, validation.message);
     });
   }
 });

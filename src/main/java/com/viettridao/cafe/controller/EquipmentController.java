@@ -1,5 +1,6 @@
 package com.viettridao.cafe.controller;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.dao.DataAccessException;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.viettridao.cafe.dto.request.equipment.CreateEquipmentRequest;
+import com.viettridao.cafe.dto.request.equipment.EditEquipmentRequest;
 import com.viettridao.cafe.dto.response.equipment.EquipmentResponse;
 import com.viettridao.cafe.service.EquipmentService;
 
@@ -53,7 +55,18 @@ public class EquipmentController extends BaseController {
             if (bindingResult.hasErrors()) {
                 log.warn("Validation failed for equipment creation: {}", bindingResult.getAllErrors());
                 model.addAttribute("createEquipmentRequest", createEquipmentRequest);
-                model.addAttribute("errorMessage", "Vui lòng kiểm tra lại thông tin nhập vào!");
+
+                // Kiểm tra lỗi ngày mua là ngày trong tương lai
+                if (bindingResult.hasFieldErrors("purchaseDate")) {
+                    String dateError = bindingResult.getFieldError("purchaseDate").getDefaultMessage();
+                    if ("Ngày mua không được lớn hơn ngày hiện tại".equals(dateError)) {
+                        model.addAttribute("errorMessage", "Ngày mua không được là ngày trong tương lai!");
+                    } else {
+                        model.addAttribute("errorMessage", "Vui lòng kiểm tra lại thông tin nhập vào!");
+                    }
+                } else {
+                    model.addAttribute("errorMessage", "Vui lòng kiểm tra lại thông tin nhập vào!");
+                }
                 return "devices/device-create";
             }
 
@@ -115,5 +128,54 @@ public class EquipmentController extends BaseController {
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa thiết bị: " + e.getMessage());
         }
         return "redirect:/device";
+    }
+
+    @GetMapping("/device/edit/{id}")
+    public String showEditDevice(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            EquipmentResponse equipment = equipmentService.getEquipmentById(id);
+            if (equipment == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy thiết bị!");
+                return "redirect:/device";
+            }
+            // Map EquipmentResponse sang UpdateEquipmentRequest
+            EditEquipmentRequest updateRequest = new EditEquipmentRequest();
+            updateRequest.setId(equipment.getId());
+            updateRequest.setEquipmentName(equipment.getEquipmentName());
+            updateRequest.setPurchasePrice(equipment.getPurchasePrice());
+            updateRequest.setQuantity(equipment.getQuantity());
+            updateRequest.setNotes(equipment.getNotes());
+            updateRequest.setPurchaseDate(equipment.getPurchaseDate());
+
+            System.out.println("Equipment purchaseDate---------------: " + equipment.getPurchaseDate());
+            model.addAttribute("editEquipmentRequest", updateRequest);
+            return "devices/device-edit";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra khi lấy thông tin thiết bị!");
+            return "redirect:/device";
+        }
+    }
+
+    @PostMapping("/device/edit/{id}")
+    public String updateDevice(
+            @PathVariable Integer id,
+            @Valid @ModelAttribute("editEquipmentRequest") EditEquipmentRequest editEquipmentRequest,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            if (bindingResult.hasErrors()) {
+                model.addAttribute("errorMessage", "Vui lòng kiểm tra lại thông tin nhập vào!");
+                return "devices/device-edit";
+            }
+            editEquipmentRequest.setId(id); // Set ID for the request
+            equipmentService.updateEquipment(editEquipmentRequest);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thiết bị thành công!");
+            return "redirect:/device";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Có lỗi xảy ra khi cập nhật thiết bị: " + e.getMessage());
+            return "devices/device-edit";
+        }
     }
 }
