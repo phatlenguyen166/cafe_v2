@@ -32,7 +32,19 @@ public class EquipmentServiceImpl implements EquipmentService {
         // Tạo entity mới từ request
         EquipmentEntity equipment = equipmentMapper.convertToEntity(request);
         return equipmentRepository.save(equipment);
-        
+
+    }
+
+    @Override
+    public EquipmentResponse getEquipmentById(Integer id) {
+        EquipmentEntity equipment = equipmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Equipment not found with id: " + id));
+        return equipmentMapper.convertToDto(equipment);
+    }
+
+    @Override
+    public void deleteEquipment(Integer id) {
+        equipmentRepository.deleteById(id);
     }
 
 }

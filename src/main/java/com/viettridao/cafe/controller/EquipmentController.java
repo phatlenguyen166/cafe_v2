@@ -7,13 +7,14 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.viettridao.cafe.dto.request.equipment.CreateEquipmentRequest;
-import com.viettridao.cafe.dto.request.import_request.ImportRequest;
 import com.viettridao.cafe.dto.response.equipment.EquipmentResponse;
 import com.viettridao.cafe.service.EquipmentService;
 
@@ -105,4 +106,14 @@ public class EquipmentController extends BaseController {
 
     // return "devices/device-import";
     // }
+    @PostMapping("/device/delete/{id}")
+    public String deleteDevice(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            equipmentService.deleteEquipment(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa thiết bị thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa thiết bị: " + e.getMessage());
+        }
+        return "redirect:/device";
+    }
 }

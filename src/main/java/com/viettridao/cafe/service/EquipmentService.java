@@ -10,4 +10,8 @@ public interface EquipmentService {
     List<EquipmentResponse> getAllEquipments();
 
     EquipmentEntity createEquipment(CreateEquipmentRequest request);
+
+    EquipmentResponse getEquipmentById(Integer id);
+
+    void deleteEquipment(Integer id);
 }
