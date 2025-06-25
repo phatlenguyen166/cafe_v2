@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.viettridao.cafe.dto.request.equipment.CreateEquipmentRequest;
-import com.viettridao.cafe.dto.request.equipment.ImportEquipmentRequest;
+import com.viettridao.cafe.dto.request.import_request.ImportRequest;
 import com.viettridao.cafe.dto.response.equipment.EquipmentResponse;
 import com.viettridao.cafe.service.EquipmentService;
 
@@ -39,14 +39,6 @@ public class EquipmentController extends BaseController {
     public String showCreateDevice(Model model) {
         model.addAttribute("createEquipmentRequest", new CreateEquipmentRequest());
         return "devices/device-create";
-    }
-
-    @GetMapping("/device/import")
-    public String showImportDevice(Model model) {
-        List<EquipmentResponse> listEquipment = equipmentService.getAllEquipments();
-        model.addAttribute("listEquipment", listEquipment);
-        // model.addAttribute("importEquipmentRequest", new ImportEquipmentRequest());
-        return "devices/device-import";
     }
 
     @PostMapping("/device/create")
@@ -100,4 +92,17 @@ public class EquipmentController extends BaseController {
             return "devices/device-create";
         }
     }
+    // @GetMapping("/device/import")
+    // public String showImportDevice(Model model) {
+    // List<EquipmentResponse> listEquipment = equipmentService.getAllEquipments();
+    // model.addAttribute("listEquipment", listEquipment);
+    // model.addAttribute("importRequest", new ImportRequest());
+    // return "devices/device-import";
+    // }
+
+    // @PostMapping("/device/import")
+    // public String showImportDevice(ImportRequest request, Model model) {
+
+    // return "devices/device-import";
+    // }
 }

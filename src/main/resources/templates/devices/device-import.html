@@ -50,7 +50,12 @@
               required
             >
               <option value="">-- Chọn thiết bị --</option>
-              <!-- Options sẽ được JS render -->
+              <option
+                th:each="item : ${listEquipment}"
+                th:value="${item.id}"
+                th:text="${item.equipmentName}"
+                th:data-price="${item.purchasePrice}"
+              ></option>
             </select>
           </div>
           <div>

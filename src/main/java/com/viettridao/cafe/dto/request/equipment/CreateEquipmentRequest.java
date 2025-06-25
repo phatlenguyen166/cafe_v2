@@ -1,6 +1,9 @@
 package com.viettridao.cafe.dto.request.equipment;
 
 import lombok.*;
+
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.*;
 
 @Data
@@ -17,8 +20,16 @@ public class CreateEquipmentRequest {
     @DecimalMax(value = "1000000000.0", message = "Giá mua không được quá 1 tỷ VNĐ")
     private Double purchasePrice;
 
-    // Mặc định quantity = 0, không cần validation
-    private Integer quantity = 0;
+    @NotNull(message = "Số lượng không được để trống")
+    @Min(value = 1, message = "Số lượng phải lớn hơn 0")
+    private Integer quantity;
 
     private Boolean isDeleted = false;
+
+    @Size(max = 255, message = "Ghi chú không được quá 255 ký tự")
+    private String notes;
+
+    @NotNull(message = "Ngày mua không được để trống")
+    @PastOrPresent(message = "Ngày mua không được lớn hơn ngày hiện tại")
+    private LocalDate purchaseDate;
 }

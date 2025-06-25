@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const purchasePriceInput = document.getElementById("purchasePrice");
   const form = document.getElementById("deviceForm");
   const submitBtn = document.getElementById("submitBtn");
+  const quantityInput = document.getElementById("quantity");
+  const totalAmountInput = document.getElementById("totalAmount");
 
   // Validation functions
   function validateEquipmentName(name) {
@@ -115,6 +117,25 @@ document.addEventListener("DOMContentLoaded", function () {
       const validation = validatePurchasePrice(e.target.value);
       showValidationMessage(e.target, validation.valid, validation.message);
     });
+  }
+
+  const calculateTotalAmount = () => {
+    if (!quantityInput || !purchasePriceInput || !totalAmountInput) return;
+    // Lấy giá trị số lượng
+    const quantity = parseInt(quantityInput.value) || 0;
+    // Lấy giá trị đơn giá (bỏ dấu . , ...)
+    const price =
+      parseInt(purchasePriceInput.value.replace(/[\.\s,]/g, "")) || 0;
+    // Tính tổng tiền
+    const total = quantity * price;
+    // Hiển thị tổng tiền đã format
+    totalAmountInput.value =
+      total > 0 ? total.toLocaleString("vi-VN") + " VNĐ" : "";
+  };
+
+  if (quantityInput && purchasePriceInput && totalAmountInput) {
+    quantityInput.addEventListener("input", calculateTotalAmount);
+    purchasePriceInput.addEventListener("input", calculateTotalAmount);
   }
 
   // Form submission validation
