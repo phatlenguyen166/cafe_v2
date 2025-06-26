@@ -1,16 +1,14 @@
 package com.viettridao.cafe.service.impl;
 
-import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
 
 import com.viettridao.cafe.dto.request.import_request.ImportRequest;
-import com.viettridao.cafe.mapper.ImportMapper;
 import com.viettridao.cafe.model.EmployeeEntity;
-import com.viettridao.cafe.model.EquipmentEntity;
 import com.viettridao.cafe.model.ImportEntity;
+import com.viettridao.cafe.model.ProductEntity;
 import com.viettridao.cafe.repository.EmployeeRepository;
-import com.viettridao.cafe.repository.EquipmentRepository;
 import com.viettridao.cafe.repository.ImportRepository;
+import com.viettridao.cafe.repository.ProductRepository;
 import com.viettridao.cafe.service.ImportService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,17 +18,27 @@ import lombok.RequiredArgsConstructor;
 public class ImportServiceImpl implements ImportService {
 
     private final EmployeeRepository employeeRepository;
-    private final EquipmentRepository equipmentRepository;
+    private final ProductRepository productRepository;
     private final ImportRepository importRepository;
-    private final ImportMapper importMapper;
 
     @Override
-    public ImportEntity createImportEquipment(ImportRequest request, Integer employeeId) {
+    public ImportEntity createImport(ImportRequest request, Integer employeeId) {
+        ProductEntity product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
 
         EmployeeEntity employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new IllegalArgumentException("Employee not found with id: " + employeeId));
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
 
-        ImportEntity importEntity = importMapper.converToEntity(request, employee, null);
+        ImportEntity importEntity = new ImportEntity();
+        importEntity.setImportDate(request.getImportDate());
+        importEntity.setQuantity(request.getQuantity());
+        importEntity.setIsDeleted(false);
+        importEntity.setEmployee(employee);
+        importEntity.setProduct(product);
+        importEntity.setTotalAmount(product.getPrice() * request.getQuantity());
+
+        product.setQuantity(product.getQuantity() + request.getQuantity());
+        productRepository.save(product);
 
         return importRepository.save(importEntity);
     }

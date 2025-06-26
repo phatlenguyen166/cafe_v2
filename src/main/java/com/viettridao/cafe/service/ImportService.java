@@ -5,5 +5,5 @@ import com.viettridao.cafe.model.ImportEntity;
 
 public interface ImportService {
 
-    ImportEntity createImportEquipment(ImportRequest request, Integer employeeId);
+    ImportEntity createImport(ImportRequest request, Integer employeeId);
 }
