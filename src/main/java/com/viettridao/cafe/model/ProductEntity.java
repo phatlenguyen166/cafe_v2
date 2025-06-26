@@ -25,6 +25,9 @@ public class ProductEntity {
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
+    @Column(name = "price")
+    private Double price;
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ImportEntity> imports;
 
