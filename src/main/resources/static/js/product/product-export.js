@@ -3,7 +3,7 @@ let currentUnit = "thùng";
 
 // Update available quantity when product changes
 function updateAvailableQuantity() {
-  const select = document.getElementById("productName");
+  const select = document.getElementById("productId"); // Đúng id
   const selectedOption = select.options[select.selectedIndex];
 
   if (selectedOption.value) {
@@ -23,6 +23,7 @@ function updateAvailableQuantity() {
       quantityInput.value = Math.min(availableStock, 1);
     }
 
+    document.getElementById("availableStock").style.display = "";
     validateQuantity();
   } else {
     document.getElementById("availableStock").style.display = "none";
