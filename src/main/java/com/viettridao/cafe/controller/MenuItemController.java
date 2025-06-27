@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.viettridao.cafe.dto.request.menu_item.MenuItemRequest;
@@ -29,12 +30,15 @@ public class MenuItemController {
     private final ProductMapper productMapper;
 
     @GetMapping("/menu")
-    public String showMenu(Model model) {
-
-        List<MenuItemResponse> listMenuItems = menuItemService.getAllMenuItems();
-
+    public String showMenu(@RequestParam(value = "search", required = false) String search, Model model) {
+        List<MenuItemResponse> listMenuItems;
+        if (search != null && !search.trim().isEmpty()) {
+            listMenuItems = menuItemService.searchMenuItemsByName(search.trim());
+        } else {
+            listMenuItems = menuItemService.getAllMenuItems();
+        }
         model.addAttribute("listMenuItems", listMenuItems);
-
+        model.addAttribute("searchKeyword", search);
         return "menus/menu";
     }
 

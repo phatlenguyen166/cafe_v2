@@ -15,4 +15,6 @@ public interface MenuItemService {
     MenuItemResponse getMenuItemById(Integer id);
 
     void updateMenuItem(Integer id, MenuItemRequest request);
+
+    List<MenuItemResponse> searchMenuItemsByName(String trim);
 }

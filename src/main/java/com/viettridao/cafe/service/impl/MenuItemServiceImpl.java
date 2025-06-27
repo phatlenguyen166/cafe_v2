@@ -143,4 +143,10 @@ public class MenuItemServiceImpl implements MenuItemService {
         menuItemRepository.save(menuItemEntity);
     }
 
+    @Override
+    public List<MenuItemResponse> searchMenuItemsByName(String keyword) {
+        List<MenuItemEntity> entities = menuItemRepository.findByItemNameContainingIgnoreCase(keyword);
+        return entities.stream().map(menuItemMapper::convertToDto).toList();
+    }
+
 }
