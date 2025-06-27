@@ -13,4 +13,6 @@ public interface MenuItemService {
     void createMenu(MenuItemRequest request);
 
     MenuItemResponse getMenuItemById(Integer id);
+
+    void updateMenuItem(Integer id, MenuItemRequest request);
 }

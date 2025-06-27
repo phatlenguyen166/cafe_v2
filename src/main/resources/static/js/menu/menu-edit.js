@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Khi submit form, log ra dữ liệu như trước
   menuForm.addEventListener("submit", function (e) {
-    e.preventDefault();
+    // e.preventDefault();
 
     const itemName = document.getElementById("itemName").value;
     const currentPrice = document.getElementById("currentPrice").value;
@@ -90,11 +90,10 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    console.log({
-      itemName,
-      currentPrice,
-      menuDetails,
-    });
-    alert("Xem dữ liệu trong console!");
+    // console.log({
+    //   itemName,
+    //   currentPrice,
+    //   menuDetails,
+    // });
   });
 });

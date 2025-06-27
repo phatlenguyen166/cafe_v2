@@ -32,29 +32,36 @@ public class MenuItemServiceImpl implements MenuItemService {
     private final ProductRepository productRepository;
 
     @Override
-    public MenuItemResponse getMenuItemById(Integer id) {
-
+    @Transactional
+    public void updateMenuItem(Integer id, MenuItemRequest request) {
         MenuItemEntity menuItemEntity = menuItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Menu item not found with id: " + id));
+        menuItemEntity.setItemName(request.getItemName());
+        menuItemEntity.setCurrentPrice(request.getCurrentPrice());
+        menuItemEntity.setIsDeleted(request.getIsDeleted());
 
-        List<MenuDetailResponse> menuDetailResponses = menuItemEntity.getMenuDetails().stream()
-                .map(menuDetailEntity -> {
-                    MenuDetailResponse detailResponse = new MenuDetailResponse();
-                    detailResponse.setProductId(menuDetailEntity.getProduct().getId());
-                    detailResponse.setProductName(menuDetailEntity.getProduct().getProductName());
-                    detailResponse.setQuantity(menuDetailEntity.getQuantity());
-                    detailResponse.setUnitName(menuDetailEntity.getUnitName());
-                    return detailResponse;
-                }).toList();
+        // 1. Xóa toàn bộ MenuDetail cũ theo menuItemId
+        menuDetailRepository.deleteAllByMenuItemId(id);
 
-        MenuItemResponse response = new MenuItemResponse();
-        response.setId(menuItemEntity.getId());
-        response.setItemName(menuItemEntity.getItemName());
-        response.setCurrentPrice(menuItemEntity.getCurrentPrice());
-        response.setIsDeleted(menuItemEntity.getIsDeleted());
-        response.setMenuDetails(menuDetailResponses);
+        // 2. Tạo list MenuDetail mới
+        List<MenuDetailEntity> newDetails = new ArrayList<>();
+        for (MenuDetailRequest detail : request.getMenuDetails()) {
+            ProductEntity productEntity = productRepository.findById(detail.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found with id: " + detail.getProductId()));
+            MenuDetailEntity detailMenu = new MenuDetailEntity();
+            detailMenu.setId(new MenuKey(productEntity.getId(), menuItemEntity.getId()));
+            detailMenu.setIsDeleted(false);
+            detailMenu.setQuantity(detail.getQuantity());
+            detailMenu.setUnitName(detail.getUnitName());
+            detailMenu.setProduct(productEntity);
+            detailMenu.setMenuItem(menuItemEntity);
+            newDetails.add(detailMenu);
+        }
+        // 3. Lưu lại toàn bộ MenuDetail mới
+        menuDetailRepository.saveAll(newDetails);
 
-        return response;
+        // 4. Lưu lại MenuItem (nếu cần)
+        menuItemRepository.save(menuItemEntity);
     }
 
     @Override
@@ -92,6 +99,32 @@ public class MenuItemServiceImpl implements MenuItemService {
             listMenuDetail.add(menuDetailEntity);
         }
         menuDetailRepository.saveAll(listMenuDetail);
+    }
+
+    @Override
+    public MenuItemResponse getMenuItemById(Integer id) {
+
+        MenuItemEntity menuItemEntity = menuItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Menu item not found with id: " + id));
+
+        List<MenuDetailResponse> menuDetailResponses = menuItemEntity.getMenuDetails().stream()
+                .map(menuDetailEntity -> {
+                    MenuDetailResponse detailResponse = new MenuDetailResponse();
+                    detailResponse.setProductId(menuDetailEntity.getProduct().getId());
+                    detailResponse.setProductName(menuDetailEntity.getProduct().getProductName());
+                    detailResponse.setQuantity(menuDetailEntity.getQuantity());
+                    detailResponse.setUnitName(menuDetailEntity.getUnitName());
+                    return detailResponse;
+                }).toList();
+
+        MenuItemResponse response = new MenuItemResponse();
+        response.setId(menuItemEntity.getId());
+        response.setItemName(menuItemEntity.getItemName());
+        response.setCurrentPrice(menuItemEntity.getCurrentPrice());
+        response.setIsDeleted(menuItemEntity.getIsDeleted());
+        response.setMenuDetails(menuDetailResponses);
+
+        return response;
     }
 
     @Override
