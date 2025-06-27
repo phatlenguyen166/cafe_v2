@@ -5,8 +5,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.viettridao.cafe.dto.request.menu_item.CreateMenuDetailRequest;
-import com.viettridao.cafe.dto.request.menu_item.CreateMenuItemRequest;
+import com.viettridao.cafe.dto.request.menu_item.MenuDetailRequest;
+import com.viettridao.cafe.dto.request.menu_item.MenuItemRequest;
+import com.viettridao.cafe.dto.response.menu_item.MenuDetailResponse;
 import com.viettridao.cafe.dto.response.menu_item.MenuItemResponse;
 import com.viettridao.cafe.mapper.MenuItemMapper;
 import com.viettridao.cafe.model.MenuDetailEntity;
@@ -31,8 +32,34 @@ public class MenuItemServiceImpl implements MenuItemService {
     private final ProductRepository productRepository;
 
     @Override
+    public MenuItemResponse getMenuItemById(Integer id) {
+
+        MenuItemEntity menuItemEntity = menuItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Menu item not found with id: " + id));
+
+        List<MenuDetailResponse> menuDetailResponses = menuItemEntity.getMenuDetails().stream()
+                .map(menuDetailEntity -> {
+                    MenuDetailResponse detailResponse = new MenuDetailResponse();
+                    detailResponse.setProductId(menuDetailEntity.getProduct().getId());
+                    detailResponse.setProductName(menuDetailEntity.getProduct().getProductName());
+                    detailResponse.setQuantity(menuDetailEntity.getQuantity());
+                    detailResponse.setUnitName(menuDetailEntity.getUnitName());
+                    return detailResponse;
+                }).toList();
+
+        MenuItemResponse response = new MenuItemResponse();
+        response.setId(menuItemEntity.getId());
+        response.setItemName(menuItemEntity.getItemName());
+        response.setCurrentPrice(menuItemEntity.getCurrentPrice());
+        response.setIsDeleted(menuItemEntity.getIsDeleted());
+        response.setMenuDetails(menuDetailResponses);
+
+        return response;
+    }
+
+    @Override
     @Transactional
-    public void createMenu(CreateMenuItemRequest request) {
+    public void createMenu(MenuItemRequest request) {
         MenuItemEntity menuItemEntity = new MenuItemEntity();
         menuItemEntity.setItemName(request.getItemName());
         menuItemEntity.setCurrentPrice(request.getCurrentPrice());
@@ -44,7 +71,7 @@ public class MenuItemServiceImpl implements MenuItemService {
 
         // 2. Tạo list MenuDetail sau khi menuItem có ID
         List<MenuDetailEntity> listMenuDetail = new ArrayList<>();
-        for (CreateMenuDetailRequest detail : request.getMenuDetails()) {
+        for (MenuDetailRequest detail : request.getMenuDetails()) {
             ProductEntity productEntity = productRepository.findById(detail.getProductId())
                     .orElseThrow(() -> new RuntimeException("Product not found with id: " +
                             detail.getProductId()));

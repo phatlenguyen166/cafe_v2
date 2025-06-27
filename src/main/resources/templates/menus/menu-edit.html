@@ -44,11 +44,11 @@
                 <label class="block text-sm font-medium mb-1">Tên món:</label>
                 <input
                   type="text"
-                  id="tenMon"
-                  name="tenMon"
+                  id="itemName"
+                  name="itemName"
                   class="w-full px-3 py-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500"
                   placeholder="Nhập tên món"
-                  value="Cà phê sữa"
+                  th:value="${menuItem.itemName}"
                   required
                 />
               </div>
@@ -56,11 +56,11 @@
                 <label class="block text-sm font-medium mb-1">Giá tiền:</label>
                 <input
                   type="number"
-                  id="giaTien"
-                  name="giaTien"
+                  id="currentPrice"
+                  name="currentPrice"
                   class="w-full px-3 py-2 border border-gray-400 rounded focus:outline-none focus:border-blue-500"
                   placeholder="0"
-                  value="25000"
+                  th:value="${menuItem.currentPrice}"
                   min="0"
                   required
                 />
@@ -73,7 +73,7 @@
               <div class="border border-gray-400 rounded">
                 <!-- Header của bảng -->
                 <div
-                  class="grid grid-cols-3 bg-gray-200 border-b border-gray-400"
+                  class="grid grid-cols-4 bg-gray-200 border-b border-gray-400"
                 >
                   <div class="px-3 py-2 font-medium border-r border-gray-400">
                     Tên thành phần ▲
@@ -81,58 +81,66 @@
                   <div class="px-3 py-2 font-medium border-r border-gray-400">
                     Khối lượng ⚬
                   </div>
-                  <div class="px-3 py-2 font-medium">Đơn vị tính ⚬</div>
+                  <div class="px-3 py-2 font-medium border-r border-gray-400">
+                    Đơn vị tính ⚬
+                  </div>
+                  <div class="px-3 py-2 font-medium text-center">Xóa</div>
                 </div>
 
                 <!-- Nội dung bảng với dữ liệu mẫu -->
-                <div id="ingredientsList" class="min-h-[120px]">
-                  <!-- Dữ liệu mẫu cà phê sữa -->
-                  <div class="grid grid-cols-3 border-b border-gray-300">
-                    <div class="px-3 py-2 border-r border-gray-300">Cà phê</div>
-                    <div class="px-3 py-2 border-r border-gray-300">15</div>
-                    <div class="px-3 py-2 flex justify-between items-center">
-                      <span>gam</span>
-                      <button
-                        type="button"
-                        onclick="removeIngredient(0)"
-                        class="text-red-500 hover:text-red-700 ml-2"
-                        title="Xóa thành phần"
-                      >
-                        ✕
-                      </button>
-                    </div>
+                <div id="menuDetails" class="min-h-[120px]">
+                  <div
+                    th:if="${#lists.isEmpty(menuItem.menuDetails)}"
+                    class="grid grid-cols-3 py-8 text-center text-gray-500"
+                  >
+                    <div class="col-span-3">Chưa có thành phần nào</div>
                   </div>
-                  <div class="grid grid-cols-3 border-b border-gray-300">
+                  <div
+                    th:each="detail, iStat : ${menuItem.menuDetails}"
+                    class="grid grid-cols-4 border-b border-gray-300"
+                  >
                     <div class="px-3 py-2 border-r border-gray-300">
-                      Sữa đặc
+                      <input
+                        type="hidden"
+                        th:name="'menuDetails[' + ${iStat.index} + '].productId'"
+                        th:value="${detail.productId}"
+                      />
+                      <input
+                        type="text"
+                        th:name="'menuDetails[' + ${iStat.index} + '].productName'"
+                        th:value="${detail.productName}"
+                        class="w-full bg-gray-100"
+                        readonly
+                      />
                     </div>
-                    <div class="px-3 py-2 border-r border-gray-300">30</div>
-                    <div class="px-3 py-2 flex justify-between items-center">
-                      <span>ml</span>
+                    <div class="px-3 py-2 border-r border-gray-300">
+                      <input
+                        type="number"
+                        th:name="'menuDetails[' + ${iStat.index} + '].quantity'"
+                        th:value="${detail.quantity}"
+                        class="w-full"
+                        min="0"
+                        step="0.1"
+                        required
+                      />
+                    </div>
+                    <div class="px-3 py-2 border-r border-gray-300">
+                      <input
+                        type="text"
+                        th:name="'menuDetails[' + ${iStat.index} + '].unitName'"
+                        th:value="${detail.unitName}"
+                        class="w-full"
+                        required
+                      />
+                    </div>
+                    <div class="px-3 py-2 flex items-center justify-center">
                       <button
                         type="button"
-                        onclick="removeIngredient(1)"
-                        class="text-red-500 hover:text-red-700 ml-2"
+                        class="delete-ingredient-btn text-red-500 text-lg font-bold"
                         title="Xóa thành phần"
+                        onclick="this.closest('.grid').remove()"
                       >
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-3">
-                    <div class="px-3 py-2 border-r border-gray-300">
-                      Nước nóng
-                    </div>
-                    <div class="px-3 py-2 border-r border-gray-300">150</div>
-                    <div class="px-3 py-2 flex justify-between items-center">
-                      <span>ml</span>
-                      <button
-                        type="button"
-                        onclick="removeIngredient(2)"
-                        class="text-red-500 hover:text-red-700 ml-2"
-                        title="Xóa thành phần"
-                      >
-                        ✕
+                        ×
                       </button>
                     </div>
                   </div>
@@ -143,12 +151,17 @@
                   class="grid grid-cols-3 border-t border-gray-400 bg-gray-50"
                 >
                   <div class="px-3 py-2 border-r border-gray-400">
-                    <input
-                      type="text"
+                    <select
                       id="newIngredientName"
-                      placeholder="Nhập tên thành phần"
                       class="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                    />
+                    >
+                      <option value="">Chọn thành phần</option>
+                      <option
+                        th:each="product : ${listProducts}"
+                        th:value="${product.id}"
+                        th:text="${product.productName}"
+                      ></option>
+                    </select>
                   </div>
                   <div class="px-3 py-2 border-r border-gray-400">
                     <input
@@ -161,18 +174,21 @@
                     />
                   </div>
                   <div class="px-3 py-2">
-                    <select
+                    <input
+                      type="text"
                       id="newIngredientUnit"
+                      placeholder="Đơn vị tính"
                       class="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                    >
-                      <option value="">Chọn đơn vị</option>
-                      <option value="gam">gam</option>
-                      <option value="ml">ml</option>
-                      <option value="kg">kg</option>
-                      <option value="lít">lít</option>
-                      <option value="muỗng">muỗng</option>
-                      <option value="cái">cái</option>
-                    </select>
+                      list="unitSuggestions"
+                    />
+                    <datalist id="unitSuggestions">
+                      <option value="gam"></option>
+                      <option value="ml"></option>
+                      <option value="kg"></option>
+                      <option value="lít"></option>
+                      <option value="muỗng"></option>
+                      <option value="cái"></option>
+                    </datalist>
                   </div>
                 </div>
 
@@ -204,6 +220,7 @@
               >
                 Hủy
               </button>
+              <p th:text="${#lists.size(menuItem.menuDetails)}"></p>
             </div>
           </form>
 

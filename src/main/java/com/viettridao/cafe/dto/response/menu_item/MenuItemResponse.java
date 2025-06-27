@@ -1,5 +1,7 @@
 package com.viettridao.cafe.dto.response.menu_item;
 
+import java.util.List;
+
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,5 +14,5 @@ public class MenuItemResponse {
     private String itemName;
     private Double currentPrice;
     private Boolean isDeleted;
+    private List<MenuDetailResponse> menuDetails;
 }
-    

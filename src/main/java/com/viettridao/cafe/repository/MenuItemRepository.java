@@ -11,4 +11,5 @@ import com.viettridao.cafe.model.MenuItemEntity;
 public interface MenuItemRepository extends JpaRepository<MenuItemEntity, Integer> {
 
     List<MenuItemEntity> findAllByIsDeletedFalse();
+
 }

@@ -2,14 +2,13 @@ package com.viettridao.cafe.dto.request.menu_item;
 
 import java.util.List;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateMenuItemRequest {
+public class MenuItemRequest {
     @NotBlank(message = "Tên món không được để trống")
     private String itemName;
 
@@ -19,5 +18,5 @@ public class CreateMenuItemRequest {
 
     private Boolean isDeleted = false;
 
-    private List<CreateMenuDetailRequest> menuDetails;
+    private List<MenuDetailRequest> menuDetails;
 }

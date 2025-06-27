@@ -8,7 +8,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateMenuDetailRequest {
+public class MenuDetailRequest {
     @NotNull(message = "Thành phần không được để trống")
     @Min(value = 1, message = "Thành phần không hợp lệ")
     private Integer productId;
