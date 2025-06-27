@@ -3,7 +3,7 @@ package com.viettridao.cafe.service;
 import java.util.List;
 
 import com.viettridao.cafe.dto.request.equipment.CreateEquipmentRequest;
-import com.viettridao.cafe.dto.request.equipment.EditEquipmentRequest;
+import com.viettridao.cafe.dto.request.equipment.UpdateEquipmentRequest;
 import com.viettridao.cafe.dto.response.equipment.EquipmentResponse;
 import com.viettridao.cafe.model.EquipmentEntity;
 
@@ -16,5 +16,5 @@ public interface EquipmentService {
 
     void deleteEquipment(Integer id);
 
-    void updateEquipment(EditEquipmentRequest editEquipmentRequest);
+    void updateEquipment(UpdateEquipmentRequest editEquipmentRequest);
 }

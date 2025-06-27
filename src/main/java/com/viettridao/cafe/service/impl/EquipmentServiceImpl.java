@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.viettridao.cafe.dto.request.equipment.CreateEquipmentRequest;
-import com.viettridao.cafe.dto.request.equipment.EditEquipmentRequest;
+import com.viettridao.cafe.dto.request.equipment.UpdateEquipmentRequest;
 import com.viettridao.cafe.dto.response.equipment.EquipmentResponse;
 import com.viettridao.cafe.mapper.EquipmentMapper;
 import com.viettridao.cafe.model.EquipmentEntity;
@@ -49,7 +49,7 @@ public class EquipmentServiceImpl implements EquipmentService {
     }
 
     @Override
-    public void updateEquipment(EditEquipmentRequest editEquipmentRequest) {
+    public void updateEquipment(UpdateEquipmentRequest editEquipmentRequest) {
         // Tìm thiết bị theo id
         EquipmentEntity equipment = equipmentRepository.findById(editEquipmentRequest.getId())
                 .orElseThrow(() -> new IllegalArgumentException(

@@ -108,8 +108,6 @@ document.addEventListener("DOMContentLoaded", function () {
       ingredients.push(ingredient);
       renderIngredients();
       clearIngredientInputs();
-    } else {
-      alert("Vui lòng điền đầy đủ thông tin thành phần!");
     }
   });
 

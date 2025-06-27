@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EditEquipmentRequest {
+public class UpdateEquipmentRequest {
 
     private Integer id;
 
@@ -37,5 +37,4 @@ public class EditEquipmentRequest {
     @Size(max = 255, message = "Ghi chú không được quá 255 ký tự")
     private String notes;
 
-    // private LocalDate purchaseDate;
 }

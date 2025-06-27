@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.viettridao.cafe.dto.request.equipment.CreateEquipmentRequest;
-import com.viettridao.cafe.dto.request.equipment.EditEquipmentRequest;
+import com.viettridao.cafe.dto.request.equipment.UpdateEquipmentRequest;
 import com.viettridao.cafe.dto.response.equipment.EquipmentResponse;
 import com.viettridao.cafe.service.EquipmentService;
 
@@ -146,7 +146,7 @@ public class EquipmentController extends BaseController {
     @PostMapping("/device/edit/{id}")
     public String updateDevice(
             @PathVariable Integer id,
-            @Valid @ModelAttribute("editEquipmentRequest") EditEquipmentRequest editEquipmentRequest,
+            @Valid @ModelAttribute("editEquipmentRequest") UpdateEquipmentRequest editEquipmentRequest,
             BindingResult bindingResult,
             Model model,
             RedirectAttributes redirectAttributes) {
