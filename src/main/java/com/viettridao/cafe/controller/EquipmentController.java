@@ -105,19 +105,7 @@ public class EquipmentController extends BaseController {
             return "devices/device-create";
         }
     }
-    // @GetMapping("/device/import")
-    // public String showImportDevice(Model model) {
-    // List<EquipmentResponse> listEquipment = equipmentService.getAllEquipments();
-    // model.addAttribute("listEquipment", listEquipment);
-    // model.addAttribute("importRequest", new ImportRequest());
-    // return "devices/device-import";
-    // }
 
-    // @PostMapping("/device/import")
-    // public String showImportDevice(ImportRequest request, Model model) {
-
-    // return "devices/device-import";
-    // }
     @PostMapping("/device/delete/{id}")
     public String deleteDevice(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
@@ -138,16 +126,16 @@ public class EquipmentController extends BaseController {
                 return "redirect:/device";
             }
             // Map EquipmentResponse sang UpdateEquipmentRequest
-            EditEquipmentRequest updateRequest = new EditEquipmentRequest();
-            updateRequest.setId(equipment.getId());
-            updateRequest.setEquipmentName(equipment.getEquipmentName());
-            updateRequest.setPurchasePrice(equipment.getPurchasePrice());
-            updateRequest.setQuantity(equipment.getQuantity());
-            updateRequest.setNotes(equipment.getNotes());
+            // EditEquipmentRequest updateRequest = new EditEquipmentRequest();
+            // updateRequest.setId(equipment.getId());
+            // updateRequest.setEquipmentName(equipment.getEquipmentName());
+            // updateRequest.setPurchasePrice(equipment.getPurchasePrice());
+            // updateRequest.setQuantity(equipment.getQuantity());
+            // updateRequest.setNotes(equipment.getNotes());
             // updateRequest.setPurchaseDate(equipment.getPurchaseDate());
 
             System.out.println("Equipment purchaseDate---------------: " + equipment.getPurchaseDate());
-            model.addAttribute("editEquipmentRequest", updateRequest);
+            model.addAttribute("equipment", equipment);
             return "devices/device-edit";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra khi lấy thông tin thiết bị!");
@@ -177,4 +165,18 @@ public class EquipmentController extends BaseController {
             return "devices/device-edit";
         }
     }
+
+    // @GetMapping("/device/import")
+    // public String showImportDevice(Model model) {
+    // List<EquipmentResponse> listEquipment = equipmentService.getAllEquipments();
+    // model.addAttribute("listEquipment", listEquipment);
+    // model.addAttribute("importRequest", new ImportRequest());
+    // return "devices/device-import";
+    // }
+
+    // @PostMapping("/device/import")
+    // public String showImportDevice(ImportRequest request, Model model) {
+
+    // return "devices/device-import";
+    // }
 }

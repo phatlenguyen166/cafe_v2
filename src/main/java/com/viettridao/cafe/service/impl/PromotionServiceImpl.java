@@ -114,18 +114,19 @@ public class PromotionServiceImpl implements PromotionService {
         promotion.setStartDate(request.getStartDate());
         promotion.setEndDate(request.getEndDate());
         promotion.setDiscountValue(request.getDiscountValue());
-        promotion.setStatus(request.getStatus() != null ? request.getStatus() : true);
+        // promotion.setStatus(request.getStatus() != null ? request.getStatus() :
+        // true);
 
-        // Set description (có thể null)
-        if (request.getDescription() != null) {
-            String desc = request.getDescription().trim();
-            if (!desc.isEmpty()) {
-                if (desc.length() > 500) {
-                    throw new IllegalArgumentException("Mô tả không được vượt quá 500 ký tự");
-                }
-                promotion.setDescription(desc);
-            }
-        }
+        // // Set description (có thể null)
+        // if (request.getDescription() != null) {
+        // String desc = request.getDescription().trim();
+        // if (!desc.isEmpty()) {
+        // if (desc.length() > 500) {
+        // throw new IllegalArgumentException("Mô tả không được vượt quá 500 ký tự");
+        // }
+        // promotion.setDescription(desc);
+        // }
+        // }
 
         // Set default values cho soft delete
         promotion.setIsDeleted(false);
@@ -175,14 +176,15 @@ public class PromotionServiceImpl implements PromotionService {
         existingPromotion.setStartDate(request.getStartDate());
         existingPromotion.setEndDate(request.getEndDate());
         existingPromotion.setDiscountValue(request.getDiscountValue());
-        existingPromotion.setStatus(request.getStatus());
+        // existingPromotion.setStatus(request.getStatus());
 
-        // Cập nhật description
-        if (request.getDescription() != null && !request.getDescription().trim().isEmpty()) {
-            existingPromotion.setDescription(request.getDescription().trim());
-        } else {
-            existingPromotion.setDescription(null);
-        }
+        // // Cập nhật description
+        // if (request.getDescription() != null &&
+        // !request.getDescription().trim().isEmpty()) {
+        // existingPromotion.setDescription(request.getDescription().trim());
+        // } else {
+        // existingPromotion.setDescription(null);
+        // }
 
         try {
             PromotionEntity saved = promotionRepository.save(existingPromotion);
@@ -207,11 +209,6 @@ public class PromotionServiceImpl implements PromotionService {
         // 3. Kiểm tra promotion đã bị xóa chưa (nếu có soft delete)
         if (promotion.getIsDeleted() != null && promotion.getIsDeleted()) {
             throw new RuntimeException("Khuyến mãi đã bị xóa trước đó");
-        }
-
-        // 4. Kiểm tra promotion có đang active không (business rule)
-        if (promotion.getStatus() != null && promotion.getStatus()) {
-            throw new RuntimeException("Không thể xóa khuyến mãi đang hoạt động. Vui lòng vô hiệu hóa trước khi xóa");
         }
 
         // 5. Kiểm tra promotion có đang được sử dụng không (nếu có liên kết với orders)

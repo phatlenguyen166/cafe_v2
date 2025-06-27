@@ -37,8 +37,4 @@ public class AddPromotionRequest {
     @DecimalMax(value = "100.0", message = "Giá trị giảm giá không được vượt quá 100%")
     private Double discountValue;
 
-    @Size(max = 500, message = "Mô tả không được vượt quá 500 ký tự")
-    private String description;
-
-    private Boolean status = true; // Mặc định là active
 }
