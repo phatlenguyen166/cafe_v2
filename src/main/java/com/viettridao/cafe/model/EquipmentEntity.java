@@ -40,6 +40,9 @@ public class EquipmentEntity {
     @Column(name = "purchase_price")
     private Double purchasePrice;
 
+    @Column(name = "total_amount")
+    private Double totalAmount;
+
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
