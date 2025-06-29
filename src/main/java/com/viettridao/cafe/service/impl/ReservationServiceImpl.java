@@ -60,9 +60,9 @@ public class ReservationServiceImpl implements ReservationService {
             unpaidInvoice.setStatus(InvoiceStatus.CANCELLED);
             invoiceRepository.save(unpaidInvoice);
 
-            reservationEntity.setIsDeleted(true);
-            reservationRepository.save(reservationEntity);
-
+            // reservationEntity.setIsDeleted(true);
+            // reservationRepository.save(reservationEntity);
+            reservationRepository.delete(reservationEntity);
         } catch (RuntimeException ex) {
             throw new RuntimeException("Hủy đặt bàn thất bại: " + ex.getMessage(), ex);
         } catch (Exception ex) {
