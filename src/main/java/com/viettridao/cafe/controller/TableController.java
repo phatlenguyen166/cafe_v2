@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.validation.BindingResult;
 
 import com.viettridao.cafe.dto.request.reservation.ReservationRequest;
+import com.viettridao.cafe.dto.request.table.SwitchTableRequest;
 import com.viettridao.cafe.dto.response.table.TableResponse;
 import com.viettridao.cafe.service.ReservationService;
 import com.viettridao.cafe.service.TableSerivce;
@@ -30,6 +31,7 @@ public class TableController extends BaseController {
     public String showTable(Model model) {
         try {
             List<TableResponse> listTables = tableService.getAllTables();
+
             model.addAttribute("listTables", listTables);
             return "tables/table";
         } catch (Exception e) {
@@ -38,7 +40,51 @@ public class TableController extends BaseController {
         }
     }
 
-    @PostMapping("/sale/create-reservation")
+    @PostMapping("/sale/switch-table")
+    public String switchTable(
+            @Valid @ModelAttribute SwitchTableRequest request,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()
+                || request.getFromTableId() == null
+                || request.getToTableId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn đầy đủ thông tin chuyển bàn.");
+            return "redirect:/sale";
+        }
+        if (request.getFromTableId().equals(request.getToTableId())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể chuyển sang chính bàn này!");
+            return "redirect:/sale";
+        }
+        try {
+            tableService.switchTable(request);
+            redirectAttributes.addFlashAttribute("successMessage", "Chuyển bàn thành công!");
+        } catch (RuntimeException ex) {
+            ex.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Đã xảy ra lỗi không xác định khi chuyển bàn.");
+        }
+        return "redirect:/sale";
+    }
+
+    @PostMapping("/sale/cancel-table")
+    public String cancelReservation(
+            @ModelAttribute("tableId") Integer tableId,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        try {
+            reservationService.cancelReservation(tableId);
+            redirectAttributes.addFlashAttribute("successMessage", "Hủy đặt bàn thành công!");
+            return "redirect:/sale";
+        } catch (RuntimeException ex) {
+            ex.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/sale";
+        }
+    }
+
+    @PostMapping("/sale/create-table")
     public String createReservation(
             @Valid @ModelAttribute ReservationRequest request,
             BindingResult bindingResult,

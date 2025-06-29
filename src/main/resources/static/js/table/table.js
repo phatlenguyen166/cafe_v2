@@ -12,6 +12,16 @@ document.addEventListener("DOMContentLoaded", function () {
   const reservationDateInput = document.getElementById("reservationDateInput");
   const dateInput = document.getElementById("dateInput");
   const timeInput = document.getElementById("timeInput");
+  const cancelTableBtn = document.getElementById("cancelTableBtn");
+  const cancelTableForm = document.getElementById("cancelTableForm");
+  const cancelTableIdInput = document.getElementById("cancelTableIdInput");
+  const openSwitchTableModal = document.getElementById("openSwitchTableModal");
+  const switchTableModal = document.getElementById("switchTableModal");
+  const closeSwitchTableModal = document.getElementById(
+    "closeSwitchTableModal"
+  );
+  const switchFromTableName = document.getElementById("switchFromTableName");
+  const fromTableIdInput = document.getElementById("fromTableIdInput");
 
   tableItems.forEach((item) => {
     item.addEventListener("click", function () {
@@ -25,6 +35,9 @@ document.addEventListener("DOMContentLoaded", function () {
         selectedTableName = "";
         selectedTableStatus = null;
         openBookingModal.disabled = true; // Disable nút đặt bàn khi bỏ chọn
+        if (openSwitchTableModal) {
+          openSwitchTableModal.disabled = true; // Disable nút chuyển bàn khi bỏ chọn
+        }
         return;
       }
       tableItems.forEach((i) => {
@@ -38,6 +51,16 @@ document.addEventListener("DOMContentLoaded", function () {
       selectedTableStatus = status;
       // Bật/tắt nút đặt bàn theo trạng thái
       openBookingModal.disabled = status !== "AVAILABLE";
+      // Bật/tắt nút hủy bàn theo trạng thái
+      if (cancelTableBtn) {
+        cancelTableBtn.disabled = status !== "RESERVED";
+      }
+      // Bật/tắt nút chuyển bàn theo trạng thái
+      if (openSwitchTableModal) {
+        openSwitchTableModal.disabled = !(
+          status === "OCCUPIED" || status === "RESERVED"
+        );
+      }
     });
   });
 
@@ -125,6 +148,48 @@ document.addEventListener("DOMContentLoaded", function () {
         return false;
       }
       // Không preventDefault nếu hợp lệ, form sẽ submit bình thường
+    });
+  }
+
+  if (cancelTableBtn && cancelTableForm && cancelTableIdInput) {
+    cancelTableBtn.addEventListener("click", function () {
+      if (!selectedTable || selectedTableStatus !== "RESERVED") {
+        alert("Chỉ có thể hủy với bàn đã đặt trước!");
+        return;
+      }
+      if (!confirm("Bạn có chắc chắn muốn hủy đặt bàn này?")) {
+        return;
+      }
+      cancelTableIdInput.value = selectedTable;
+      cancelTableForm.submit();
+    });
+  }
+
+  if (
+    openSwitchTableModal &&
+    switchTableModal &&
+    closeSwitchTableModal &&
+    switchFromTableName &&
+    fromTableIdInput
+  ) {
+    openSwitchTableModal.addEventListener("click", function () {
+      if (
+        !selectedTable ||
+        (selectedTableStatus !== "OCCUPIED" &&
+          selectedTableStatus !== "RESERVED")
+      ) {
+        alert("Chỉ chuyển được bàn đã đặt hoặc đang sử dụng!");
+        return;
+      }
+      switchFromTableName.textContent = selectedTableName;
+      fromTableIdInput.value = selectedTable;
+      // Reset select về mặc định
+      document.getElementById("toTableIdInput").selectedIndex = 0;
+      switchTableModal.classList.remove("hidden");
+    });
+
+    closeSwitchTableModal.addEventListener("click", function () {
+      switchTableModal.classList.add("hidden");
     });
   }
 });

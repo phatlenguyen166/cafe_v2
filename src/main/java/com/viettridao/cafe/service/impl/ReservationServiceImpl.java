@@ -33,6 +33,45 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     @Transactional
+    public void cancelReservation(Integer tableId) {
+        try {
+            TableEntity table = tableRepository.findById(tableId)
+                    .orElseThrow(() -> new RuntimeException("Table not found"));
+            InvoiceEntity unpaidInvoice = table.getReservations().stream()
+                    .filter(reservation -> Boolean.FALSE.equals(reservation.getIsDeleted()))
+                    .filter(reservation -> reservation.getInvoice() != null
+                            && reservation.getInvoice().getStatus() == InvoiceStatus.UNPAID)
+                    .map(ReservationEntity::getInvoice)
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn chưa thanh toán cho bàn này!"));
+
+            if (unpaidInvoice == null) {
+                throw new RuntimeException("Không tìm thấy hóa đơn chưa thanh toán cho bàn này!");
+            }
+
+            ReservationEntity reservationEntity = reservationRepository.findByInvoice(unpaidInvoice);
+            if (reservationEntity == null) {
+                throw new RuntimeException("Không tìm thấy chi tiết đặt bàn cho hóa đơn này!");
+            }
+            // Cập nhật trạng thái bàn và hóa đơn trước
+            table.setStatus(TableStatus.AVAILABLE);
+            tableRepository.save(table);
+
+            unpaidInvoice.setStatus(InvoiceStatus.CANCELLED);
+            invoiceRepository.save(unpaidInvoice);
+
+            reservationEntity.setIsDeleted(true);
+            reservationRepository.save(reservationEntity);
+
+        } catch (RuntimeException ex) {
+            throw new RuntimeException("Hủy đặt bàn thất bại: " + ex.getMessage(), ex);
+        } catch (Exception ex) {
+            throw new RuntimeException("Đã xảy ra lỗi không xác định khi hủy đặt bàn.", ex);
+        }
+    }
+
+    @Override
+    @Transactional
     public ReservationResponse createReservation(ReservationRequest request, Integer employeeId) {
         try {
             EmployeeEntity employee = employeeRepository.findById(employeeId)
