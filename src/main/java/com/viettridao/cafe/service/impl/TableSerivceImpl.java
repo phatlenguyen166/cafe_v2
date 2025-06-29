@@ -24,82 +24,82 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TableSerivceImpl implements TableSerivce {
 
-    private final TableRepository tableRepository;
-    private final TableMapper tableMapper;
-    private final ReservationRepository reservationRepository;
+        private final TableRepository tableRepository;
+        private final TableMapper tableMapper;
+        private final ReservationRepository reservationRepository;
 
-    @Override
-    @Transactional
-    public TableResponse switchTable(SwitchTableRequest request) {
-        Integer fromTableId = request.getFromTableId();
-        Integer toTableId = request.getToTableId();
+        @Override
+        @Transactional
+        public TableResponse switchTable(SwitchTableRequest request) {
+                Integer fromTableId = request.getFromTableId();
+                Integer toTableId = request.getToTableId();
 
-        if (fromTableId.equals(toTableId)) {
-            throw new RuntimeException("Không thể chuyển sang chính bàn này!");
+                if (fromTableId.equals(toTableId)) {
+                        throw new RuntimeException("Không thể chuyển sang chính bàn này!");
+                }
+
+                TableEntity fromTable = tableRepository.findById(fromTableId)
+                                .orElseThrow(() -> new RuntimeException("Bàn không tồn tại: " + fromTableId));
+                TableEntity toTable = tableRepository.findById(toTableId)
+                                .orElseThrow(() -> new RuntimeException("Bàn không tồn tại: " + toTableId));
+
+                if (toTable.getStatus() != TableStatus.AVAILABLE) {
+                        throw new RuntimeException("Bàn chuyển đến phải đang trống!");
+                }
+
+                ReservationEntity fromReservation = fromTable.getReservations().stream()
+                                .filter(r -> Boolean.FALSE.equals(r.getIsDeleted()))
+                                .filter(r -> r.getInvoice() != null
+                                                && r.getInvoice().getStatus() == InvoiceStatus.UNPAID)
+                                .findFirst()
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Không tìm thấy đặt bàn chưa thanh toán cho bàn này!"));
+
+                ReservationKey fromReservationId = fromReservation.getId();
+                TableStatus fromTableStatusBeforeSwitch = fromTable.getStatus();
+
+                // Tạo reservation mới trước, nếu thành công mới xóa reservation cũ
+                ReservationEntity newReservation = new ReservationEntity();
+                newReservation.setId(new ReservationKey(
+                                toTableId,
+                                fromReservationId.getIdEmployee(),
+                                fromReservationId.getIdInvoice()));
+                newReservation.setTable(toTable);
+                newReservation.setEmployee(fromReservation.getEmployee());
+                newReservation.setInvoice(fromReservation.getInvoice());
+                newReservation.setCustomerName(fromReservation.getCustomerName());
+                newReservation.setCustomerPhone(fromReservation.getCustomerPhone());
+                newReservation.setReservationDate(fromReservation.getReservationDate());
+                newReservation.setIsDeleted(false);
+                reservationRepository.save(newReservation);
+
+                // Xóa reservation cũ
+                reservationRepository.delete(fromReservation);
+
+                // Cập nhật trạng thái bàn
+                fromTable.setStatus(TableStatus.AVAILABLE);
+                toTable.setStatus(fromTableStatusBeforeSwitch);
+
+                tableRepository.save(fromTable);
+                TableEntity updatedToTable = tableRepository.save(toTable);
+
+                return tableMapper.convertToDto(updatedToTable);
+
         }
 
-        // Lấy bàn cũ và mới
-        TableEntity fromTable = tableRepository.findById(fromTableId)
-                .orElseThrow(() -> new RuntimeException("Bàn không tồn tại: " + fromTableId));
-        TableEntity toTable = tableRepository.findById(toTableId)
-                .orElseThrow(() -> new RuntimeException("Bàn không tồn tại: " + toTableId));
-
-        if (toTable.getStatus() != TableStatus.AVAILABLE) {
-            throw new RuntimeException("Bàn chuyển đến phải đang trống!");
+        @Override
+        public List<TableResponse> getTableByStatus(TableStatus status) {
+                return tableRepository.findByStatus(status).stream()
+                                .map(tableMapper::convertToDto)
+                                .toList();
         }
 
-        // Lấy đặt bàn chưa thanh toán
-        ReservationEntity oldReservation = fromTable.getReservations().stream()
-                .filter(reservation -> Boolean.FALSE.equals(reservation.getIsDeleted()))
-                .filter(reservation -> reservation.getInvoice() != null &&
-                        reservation.getInvoice().getStatus() == InvoiceStatus.UNPAID)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đặt bàn chưa thanh toán cho bàn này!"));
-        reservationRepository.delete(oldReservation);
-        ReservationKey oldId = oldReservation.getId();
-
-        // Lưu trạng thái cũ của bàn fromTable
-        TableStatus fromTableOldStatus = fromTable.getStatus();
-
-        // Tạo bản mới
-        ReservationEntity newReservation = new ReservationEntity();
-        newReservation.setId(new ReservationKey(
-                toTableId,
-                oldId.getIdEmployee(),
-                oldId.getIdInvoice()));
-        newReservation.setTable(toTable);
-        newReservation.setEmployee(oldReservation.getEmployee());
-        newReservation.setInvoice(oldReservation.getInvoice());
-        newReservation.setCustomerName(oldReservation.getCustomerName());
-        newReservation.setCustomerPhone(oldReservation.getCustomerPhone());
-        newReservation.setReservationDate(oldReservation.getReservationDate());
-        newReservation.setIsDeleted(false);
-        reservationRepository.save(newReservation);
-
-        // Cập nhật trạng thái bàn
-        fromTable.setStatus(TableStatus.AVAILABLE);
-        toTable.setStatus(fromTableOldStatus);
-
-        tableRepository.save(fromTable);
-        TableEntity updatedToTable = tableRepository.save(toTable);
-
-        return tableMapper.convertToDto(updatedToTable);
-
-    }
-
-    @Override
-    public List<TableResponse> getTableByStatus(TableStatus status) {
-        return tableRepository.findByStatus(status).stream()
-                .map(tableMapper::convertToDto)
-                .toList();
-    }
-
-    @Override
-    public List<TableResponse> getAllTables() {
-        return tableRepository.findAllByIsDeletedFalse()
-                .stream()
-                .map(tableMapper::convertToDto)
-                .toList();
-    }
+        @Override
+        public List<TableResponse> getAllTables() {
+                return tableRepository.findAllByIsDeletedFalse()
+                                .stream()
+                                .map(tableMapper::convertToDto)
+                                .toList();
+        }
 
 }
