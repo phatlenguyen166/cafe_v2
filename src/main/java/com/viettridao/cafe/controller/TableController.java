@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.validation.BindingResult;
@@ -15,7 +16,11 @@ import com.viettridao.cafe.dto.request.table.SwitchTableRequest;
 import com.viettridao.cafe.dto.request.invoice.InvoiceRequest;
 import com.viettridao.cafe.dto.response.menu_item.MenuItemResponse;
 import com.viettridao.cafe.dto.response.table.TableResponse;
+import com.viettridao.cafe.model.InvoiceDetailEntity;
+import com.viettridao.cafe.model.InvoiceEntity;
+import com.viettridao.cafe.model.ReservationEntity;
 import com.viettridao.cafe.service.InvoiceDetailService;
+import com.viettridao.cafe.service.InvoiceService;
 import com.viettridao.cafe.service.MenuItemService;
 import com.viettridao.cafe.service.ReservationService;
 import com.viettridao.cafe.service.TableSerivce;
@@ -32,6 +37,7 @@ public class TableController extends BaseController {
     private final ReservationService reservationService;
     private final MenuItemService menuItemService;
     private final InvoiceDetailService invoiceDetailService;
+    private final InvoiceService invoiceService;
 
     @GetMapping("/sale")
     public String showTable(Model model) {
@@ -44,6 +50,42 @@ public class TableController extends BaseController {
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Không thể tải danh sách bàn.");
             return "error";
+        }
+    }
+
+    @GetMapping("/sale/view-table")
+    public String showMenu(@ModelAttribute("tableId") Integer tableId, Model model, HttpSession session) {
+        try {
+            // Lấy danh sách bàn và menu để render lại giao diện
+            List<TableResponse> listTables = tableService.getAllTables();
+            List<MenuItemResponse> listMenuItems = menuItemService.getAllMenuItems();
+            model.addAttribute("listTables", listTables);
+            model.addAttribute("listMenuItems", listMenuItems);
+
+            // Lấy hóa đơn chưa thanh toán của bàn
+            InvoiceEntity invoice = invoiceService.getByTableId(tableId);
+
+            // Lấy chi tiết hóa đơn (các món đã gọi)
+            List<InvoiceDetailEntity> invoiceDetails = invoice.getInvoiceDetails();
+            model.addAttribute("invoiceDetails", invoiceDetails);
+
+            // Lấy thông tin reservation (nếu cần)
+            ReservationEntity reservation = invoice.getReservations().stream()
+                    .filter(r -> Boolean.FALSE.equals(r.getIsDeleted()))
+                    .findFirst()
+                    .orElse(null);
+            model.addAttribute("reservation", reservation);
+            model.addAttribute("listMenuDetails", invoiceDetails);
+            // Truyền tableId để biết đang xem bàn nào
+            model.addAttribute("selectedTableId", tableId);
+
+            return "tables/table";
+        } catch (RuntimeException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            // Render lại danh sách bàn để tránh lỗi giao diện
+            model.addAttribute("listTables", tableService.getAllTables());
+            model.addAttribute("listMenuItems", menuItemService.getAllMenuItems());
+            return "tables/table";
         }
     }
 

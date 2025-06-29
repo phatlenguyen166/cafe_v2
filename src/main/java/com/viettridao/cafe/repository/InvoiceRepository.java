@@ -8,7 +8,6 @@ import com.viettridao.cafe.model.InvoiceEntity;
 @Repository
 public interface InvoiceRepository extends JpaRepository<InvoiceEntity, Integer> {
 
-    // Define any custom query methods if needed
-    // For example, to find invoices by customer ID or date range
+    InvoiceEntity findByIdAndIsDeletedFalse(Integer id);
 
 }

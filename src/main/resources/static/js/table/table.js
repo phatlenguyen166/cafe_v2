@@ -28,6 +28,18 @@ document.addEventListener("DOMContentLoaded", function () {
   const menuModalTableName = document.getElementById("menuModalTableName");
   const menuTableIdInput = document.getElementById("menuTableIdInput");
   const menuList = document.getElementById("menuList");
+  const viewTableBtn = document.getElementById("viewTableBtn");
+  const viewTableModal = document.getElementById("viewTableModal");
+  const closeViewTableModalBtns = document.querySelectorAll(
+    "#closeViewTableModal"
+  );
+  const viewTableModalTitle = document.getElementById("viewTableModalTitle");
+  const viewTableMenuList = document.getElementById("viewTableMenuList");
+  const viewTableReservationInfo = document.getElementById(
+    "viewTableReservationInfo"
+  );
+  const viewTableForm = document.getElementById("viewTableForm");
+  const viewTableIdInput = document.getElementById("viewTableIdInput");
 
   tableItems.forEach((item) => {
     item.addEventListener("click", function () {
@@ -278,6 +290,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Submit lại form
       menuForm.submit();
+    });
+  }
+
+  if (viewTableBtn && viewTableForm && viewTableIdInput) {
+    viewTableBtn.addEventListener("click", function () {
+      if (!selectedTable) {
+        alert("Vui lòng chọn bàn trước!");
+        return;
+      }
+      viewTableIdInput.value = selectedTable;
+      viewTableForm.submit();
+    });
+  }
+
+  // Tự động mở modal xem bàn nếu có biến selectedTableId (render từ backend)
+  const selectedTableId = document.body.getAttribute("data-selected-table-id");
+  if (selectedTableId && viewTableModal) {
+    viewTableModal.classList.remove("hidden");
+  }
+
+  if (closeViewTableModalBtns && viewTableModal) {
+    closeViewTableModalBtns.forEach((btn) => {
+      btn.addEventListener("click", function () {
+        window.location.href = "/sale"; // Redirect về trang danh sách bàn
+        viewTableModal.classList.add("hidden");
+      });
     });
   }
 });
