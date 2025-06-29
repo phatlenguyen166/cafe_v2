@@ -1,31 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
   let selectedTable = null;
   let selectedTableName = "";
+  let selectedTableStatus = null;
   const tableItems = document.querySelectorAll(".table-item");
-  tableItems.forEach((item) => {
-    item.addEventListener("click", function () {
-      const isSelected = this.classList.contains("border-blue-500");
-      // Nếu đang chọn thì bỏ chọn
-      if (isSelected) {
-        this.classList.remove("border-blue-500");
-        this.querySelector(".check-icon").classList.add("hidden");
-        selectedTable = null;
-        selectedTableName = "";
-        return;
-      }
-      // Bỏ chọn tất cả bàn khác
-      tableItems.forEach((i) => {
-        i.classList.remove("border-blue-500");
-        i.querySelector(".check-icon").classList.add("hidden");
-      });
-      // Chọn bàn hiện tại
-      this.classList.add("border-blue-500");
-      this.querySelector(".check-icon").classList.remove("hidden");
-      selectedTable = this.getAttribute("data-id");
-      selectedTableName = this.querySelector("span").innerText;
-    });
-  });
-
   const openBookingModal = document.getElementById("openBookingModal");
   const bookingModal = document.getElementById("bookingModal");
   const closeBookingModal = document.getElementById("closeBookingModal");
@@ -36,6 +13,34 @@ document.addEventListener("DOMContentLoaded", function () {
   const dateInput = document.getElementById("dateInput");
   const timeInput = document.getElementById("timeInput");
 
+  tableItems.forEach((item) => {
+    item.addEventListener("click", function () {
+      // Luôn cho chọn bàn
+      const status = this.getAttribute("data-status");
+      const isSelected = this.classList.contains("border-blue-500");
+      if (isSelected) {
+        this.classList.remove("border-blue-500");
+        this.querySelector(".check-icon").classList.add("hidden");
+        selectedTable = null;
+        selectedTableName = "";
+        selectedTableStatus = null;
+        openBookingModal.disabled = true; // Disable nút đặt bàn khi bỏ chọn
+        return;
+      }
+      tableItems.forEach((i) => {
+        i.classList.remove("border-blue-500");
+        i.querySelector(".check-icon").classList.add("hidden");
+      });
+      this.classList.add("border-blue-500");
+      this.querySelector(".check-icon").classList.remove("hidden");
+      selectedTable = this.getAttribute("data-id");
+      selectedTableName = this.querySelector("span").innerText;
+      selectedTableStatus = status;
+      // Bật/tắt nút đặt bàn theo trạng thái
+      openBookingModal.disabled = status !== "AVAILABLE";
+    });
+  });
+
   if (
     openBookingModal &&
     bookingModal &&
@@ -44,8 +49,8 @@ document.addEventListener("DOMContentLoaded", function () {
     bookingForm
   ) {
     openBookingModal.addEventListener("click", function () {
-      if (!selectedTable) {
-        alert("Vui lòng chọn một bàn trước khi đặt bàn.");
+      if (!selectedTable || selectedTableStatus !== "AVAILABLE") {
+        alert("Chỉ có thể đặt bàn với bàn đang trống!");
         return;
       }
       modalTableName.textContent = "Đặt bàn " + selectedTableName;

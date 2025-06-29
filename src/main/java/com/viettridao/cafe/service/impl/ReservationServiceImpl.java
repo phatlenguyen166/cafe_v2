@@ -41,6 +41,11 @@ public class ReservationServiceImpl implements ReservationService {
             TableEntity table = tableRepository.findById(request.getTableId())
                     .orElseThrow(() -> new RuntimeException("Table not found"));
 
+            // Kiểm tra trạng thái bàn
+            if (table.getStatus() != TableStatus.AVAILABLE) {
+                throw new RuntimeException("Chỉ có thể đặt bàn với bàn đang trống!");
+            }
+
             // Tạo hóa đơn rỗng
             InvoiceEntity invoice = new InvoiceEntity();
             invoice.setTotalAmount(null);
