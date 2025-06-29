@@ -1,6 +1,5 @@
 package com.viettridao.cafe.controller;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.dao.DataAccessException;
@@ -84,18 +83,6 @@ public class EquipmentController extends BaseController {
             log.error("Invalid argument when creating equipment: {}", e.getMessage());
             model.addAttribute("createEquipmentRequest", createEquipmentRequest);
             model.addAttribute("errorMessage", "Dữ liệu không hợp lệ: " + e.getMessage());
-            return "devices/device-create";
-
-        } catch (DataIntegrityViolationException e) {
-            log.error("Data integrity violation when creating equipment: {}", e.getMessage());
-            model.addAttribute("createEquipmentRequest", createEquipmentRequest);
-            model.addAttribute("errorMessage", "Thiết bị đã tồn tại hoặc vi phạm ràng buộc dữ liệu!");
-            return "devices/device-create";
-
-        } catch (DataAccessException e) {
-            log.error("Database access error when creating equipment: {}", e.getMessage());
-            model.addAttribute("createEquipmentRequest", createEquipmentRequest);
-            model.addAttribute("errorMessage", "Lỗi kết nối cơ sở dữ liệu. Vui lòng thử lại!");
             return "devices/device-create";
 
         } catch (Exception e) {

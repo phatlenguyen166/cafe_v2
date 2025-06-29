@@ -22,6 +22,12 @@ document.addEventListener("DOMContentLoaded", function () {
   );
   const switchFromTableName = document.getElementById("switchFromTableName");
   const fromTableIdInput = document.getElementById("fromTableIdInput");
+  const openMenuModalBtn = document.getElementById("openMenuModal");
+  const menuModal = document.getElementById("menuModal");
+  const closeMenuModal = document.getElementById("closeMenuModal");
+  const menuModalTableName = document.getElementById("menuModalTableName");
+  const menuTableIdInput = document.getElementById("menuTableIdInput");
+  const menuList = document.getElementById("menuList");
 
   tableItems.forEach((item) => {
     item.addEventListener("click", function () {
@@ -131,14 +137,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Validate ngày giờ phải ở tương lai
       if (date && time) {
+        // Nếu time chỉ có HH:mm, thêm :00 cho giây
+        let timeStr = time.length === 5 ? time + ":00" : time;
+        // Nếu muốn thêm mili giây, có thể thêm ".000"
+        reservationDateInput.value = `${date}T${timeStr}.000`; // hoặc `${date}T${timeStr}.000`
+        // Kiểm tra hợp lệ
         const now = new Date();
-        const reservationDate = new Date(`${date}T${time}`);
+        const reservationDate = new Date(`${date}T${timeStr}`);
         if (reservationDate <= now) {
           document.getElementById("dateError").textContent =
             "Ngày giờ phải ở tương lai!";
           hasError = true;
         }
-        reservationDateInput.value = `${date}T${time}`;
       } else {
         reservationDateInput.value = "";
       }
@@ -190,6 +200,84 @@ document.addEventListener("DOMContentLoaded", function () {
 
     closeSwitchTableModal.addEventListener("click", function () {
       switchTableModal.classList.add("hidden");
+    });
+  }
+
+  if (openMenuModalBtn && menuModal && closeMenuModal) {
+    openMenuModalBtn.addEventListener("click", function () {
+      if (!selectedTable) {
+        alert("Vui lòng chọn bàn trước!");
+        return;
+      }
+      menuModalTableName.textContent = "Chọn món bàn " + selectedTableName;
+      menuTableIdInput.value = selectedTable;
+      menuModal.classList.remove("hidden");
+    });
+
+    closeMenuModal.addEventListener("click", function () {
+      menuModal.classList.add("hidden");
+    });
+
+    // Xử lý submit thực đơn
+    const menuForm = document.getElementById("menuForm");
+    menuForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Xóa các trường invoiceDetails cũ nếu có
+      document
+        .querySelectorAll(".dynamic-invoice-detail")
+        .forEach((el) => el.remove());
+
+      const menuCheckboxes = document.querySelectorAll(".menu-checkbox");
+      let idx = 0;
+      for (let i = 0; i < menuCheckboxes.length; i++) {
+        if (menuCheckboxes[i].checked) {
+          const index = menuCheckboxes[i].getAttribute("data-index");
+          const menuId = document.querySelector(
+            `.menu-id[data-index="${index}"]`
+          ).value;
+          const quantity = document.querySelector(
+            `.menu-quantity[data-index="${index}"]`
+          ).value;
+          const price = document.querySelector(
+            `.menu-price[data-index="${index}"]`
+          ).value;
+
+          if (parseInt(quantity) > 0) {
+            // Tạo input động cho từng trường
+            let menuItemIdInput = document.createElement("input");
+            menuItemIdInput.type = "hidden";
+            menuItemIdInput.name = `invoiceDetails[${idx}].menuItemId`;
+            menuItemIdInput.value = menuId;
+            menuItemIdInput.classList.add("dynamic-invoice-detail");
+            menuForm.appendChild(menuItemIdInput);
+
+            let quantityInput = document.createElement("input");
+            quantityInput.type = "hidden";
+            quantityInput.name = `invoiceDetails[${idx}].quantity`;
+            quantityInput.value = quantity;
+            quantityInput.classList.add("dynamic-invoice-detail");
+            menuForm.appendChild(quantityInput);
+
+            let priceInput = document.createElement("input");
+            priceInput.type = "hidden";
+            priceInput.name = `invoiceDetails[${idx}].price`;
+            priceInput.value = price;
+            priceInput.classList.add("dynamic-invoice-detail");
+            menuForm.appendChild(priceInput);
+
+            idx++;
+          }
+        }
+      }
+
+      if (idx === 0) {
+        alert("Vui lòng chọn ít nhất một món và nhập số lượng > 0!");
+        return;
+      }
+
+      // Submit lại form
+      menuForm.submit();
     });
   }
 });

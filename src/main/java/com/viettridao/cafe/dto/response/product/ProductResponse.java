@@ -16,5 +16,4 @@ public class ProductResponse {
     private Boolean isDeleted;
     private Double price;
     private UnitEntity unit;
-
 }

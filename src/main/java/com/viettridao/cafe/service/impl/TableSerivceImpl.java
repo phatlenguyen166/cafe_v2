@@ -9,7 +9,6 @@ import com.viettridao.cafe.common.TableStatus;
 import com.viettridao.cafe.dto.request.table.SwitchTableRequest;
 import com.viettridao.cafe.dto.response.table.TableResponse;
 import com.viettridao.cafe.mapper.TableMapper;
-import com.viettridao.cafe.model.InvoiceEntity;
 import com.viettridao.cafe.model.ReservationEntity;
 import com.viettridao.cafe.model.ReservationKey;
 import com.viettridao.cafe.model.TableEntity;

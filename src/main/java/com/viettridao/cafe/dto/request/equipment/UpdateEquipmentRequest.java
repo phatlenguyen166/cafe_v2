@@ -1,7 +1,5 @@
 package com.viettridao.cafe.dto.request.equipment;
 
-import java.time.LocalDate;
-
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;

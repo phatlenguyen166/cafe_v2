@@ -12,7 +12,11 @@ import org.springframework.validation.BindingResult;
 
 import com.viettridao.cafe.dto.request.reservation.ReservationRequest;
 import com.viettridao.cafe.dto.request.table.SwitchTableRequest;
+import com.viettridao.cafe.dto.request.invoice.InvoiceRequest;
+import com.viettridao.cafe.dto.response.menu_item.MenuItemResponse;
 import com.viettridao.cafe.dto.response.table.TableResponse;
+import com.viettridao.cafe.service.InvoiceDetailService;
+import com.viettridao.cafe.service.MenuItemService;
 import com.viettridao.cafe.service.ReservationService;
 import com.viettridao.cafe.service.TableSerivce;
 
@@ -26,18 +30,39 @@ public class TableController extends BaseController {
 
     private final TableSerivce tableService;
     private final ReservationService reservationService;
+    private final MenuItemService menuItemService;
+    private final InvoiceDetailService invoiceDetailService;
 
     @GetMapping("/sale")
     public String showTable(Model model) {
         try {
             List<TableResponse> listTables = tableService.getAllTables();
-
+            List<MenuItemResponse> listMenuItems = menuItemService.getAllMenuItems();
+            model.addAttribute("listMenuItems", listMenuItems);
             model.addAttribute("listTables", listTables);
             return "tables/table";
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Không thể tải danh sách bàn.");
-            return "error"; // hoặc trả về trang lỗi riêng của bạn
+            return "error";
         }
+    }
+
+    @PostMapping("/sale/create-menu")
+    public String createMenu(
+            @ModelAttribute InvoiceRequest invoiceRequest,
+            RedirectAttributes redirectAttributes, HttpSession session) {
+        try {
+
+            invoiceDetailService.createInvoiceDetail(invoiceRequest, getCurrentUser(session).getEmployee().getId());
+            redirectAttributes.addFlashAttribute("successMessage", "Thêm thực đơn thành công!");
+        } catch (RuntimeException ex) {
+            ex.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Đã xảy ra lỗi khi thêm thực đơn.");
+        }
+        return "redirect:/sale";
     }
 
     @PostMapping("/sale/switch-table")
