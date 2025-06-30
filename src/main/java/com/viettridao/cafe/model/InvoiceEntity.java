@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -36,7 +37,7 @@ public class InvoiceEntity {
     private PromotionEntity promotion;
 
     @OneToMany(mappedBy = "invoice")
-    private List<InvoiceDetailEntity> invoiceDetails;
+    private List<InvoiceDetailEntity> invoiceDetails = new ArrayList<>();
 
     @OneToMany(mappedBy = "invoice")
     private List<ReservationEntity> reservations;

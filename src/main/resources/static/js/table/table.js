@@ -40,6 +40,9 @@ document.addEventListener("DOMContentLoaded", function () {
   );
   const viewTableForm = document.getElementById("viewTableForm");
   const viewTableIdInput = document.getElementById("viewTableIdInput");
+  const openMergeTableModal = document.getElementById("openMergeTableModal");
+  const mergeTableModal = document.getElementById("mergeTableModal");
+  const closeMergeTableModal = document.getElementById("closeMergeTableModal");
 
   tableItems.forEach((item) => {
     item.addEventListener("click", function () {
@@ -360,5 +363,57 @@ document.addEventListener("DOMContentLoaded", function () {
     window.location.pathname.includes("/sale/payment")
   ) {
     paymentModal.classList.remove("hidden");
+  }
+
+  if (openMergeTableModal && mergeTableModal) {
+    openMergeTableModal.addEventListener("click", function () {
+      mergeTableModal.classList.remove("hidden");
+    });
+  }
+  if (closeMergeTableModal && mergeTableModal) {
+    closeMergeTableModal.addEventListener("click", function () {
+      mergeTableModal.classList.add("hidden");
+    });
+  }
+
+  // Xử lý lọc bàn gộp đến khi chọn bàn cần gộp
+  const mergeTableCheckboxes = document.querySelectorAll(
+    ".merge-table-checkbox"
+  );
+  const mergeTableRadios = document.querySelectorAll(".merge-table-radio");
+
+  function updateTargetTableList() {
+    // Lấy danh sách id bàn đã chọn
+    const checkedIds = Array.from(mergeTableCheckboxes)
+      .filter((cb) => cb.checked)
+      .map((cb) => cb.value);
+
+    mergeTableRadios.forEach((radio) => {
+      const label = radio.closest("label");
+      const tableId = radio.value;
+      const tableStatus = label && label.getAttribute("data-status");
+      // Hiện radio nếu là bàn rảnh (AVAILABLE) hoặc nằm trong checkedIds
+      if (checkedIds.includes(tableId) || tableStatus === "AVAILABLE") {
+        label.style.display = "";
+        radio.disabled = false;
+      } else {
+        label.style.display = "none";
+        radio.checked = false;
+        radio.disabled = true;
+      }
+    });
+  }
+
+  // Lắng nghe sự kiện thay đổi checkbox
+  mergeTableCheckboxes.forEach((cb) => {
+    cb.addEventListener("change", updateTargetTableList);
+  });
+
+  // Gọi 1 lần khi mở modal để đảm bảo đúng trạng thái
+  if (openMergeTableModal && mergeTableModal) {
+    openMergeTableModal.addEventListener("click", function () {
+      mergeTableModal.classList.remove("hidden");
+      updateTargetTableList();
+    });
   }
 });

@@ -211,4 +211,32 @@ public class TableController extends BaseController {
         }
         return "redirect:/sale";
     }
+
+    @PostMapping("/sale/merge-table")
+    public String mergeTable(
+            @RequestParam("mergeTableIds") List<Integer> mergeTableIds,
+            @RequestParam("targetTableId") Integer targetTableId,
+            RedirectAttributes redirectAttributes) {
+        try {
+            if (mergeTableIds == null || mergeTableIds.isEmpty() || targetTableId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn bàn cần gộp và bàn gộp đến!");
+                return "redirect:/sale";
+            }
+            if (!mergeTableIds.contains(targetTableId)
+                    && !tableService.getTableById(targetTableId).getStatus().name().equals("AVAILABLE")) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Chỉ được gộp vào bàn trống hoặc một trong các bàn nguồn!");
+                return "redirect:/sale";
+            }
+            tableService.mergeTables(mergeTableIds, targetTableId);
+            redirectAttributes.addFlashAttribute("successMessage", "Gộp bàn thành công!");
+        } catch (RuntimeException ex) {
+            ex.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Đã xảy ra lỗi khi gộp bàn.");
+        }
+        return "redirect:/sale";
+    }
 }

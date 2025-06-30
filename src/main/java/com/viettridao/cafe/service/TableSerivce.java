@@ -15,4 +15,6 @@ public interface TableSerivce {
     List<TableResponse> getTableByStatus(TableStatus status);
 
     TableEntity getTableById(Integer tableId);
+
+    void mergeTables(List<Integer> mergeTableIds, Integer targetTableId);
 }
