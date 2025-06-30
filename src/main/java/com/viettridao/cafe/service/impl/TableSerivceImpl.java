@@ -185,9 +185,20 @@ public class TableSerivceImpl implements TableSerivce {
                                 if (existed != null) {
                                         existed.setQuantity(existed.getQuantity() + detail.getQuantity());
                                         invoiceDetailRepository.save(existed);
-                                        detailsToRemove.add(detail); // sẽ xóa detail này sau
+                                        detailsToRemove.add(detail);
+                                } else {
+                                        InvoiceDetailEntity newDetail = new InvoiceDetailEntity();
+                                        newDetail.setId(new InvoiceKey(targetInvoice.getId(),
+                                                        detail.getMenuItem().getId()));
+                                        newDetail.setInvoice(targetInvoice);
+                                        newDetail.setMenuItem(detail.getMenuItem());
+                                        newDetail.setQuantity(detail.getQuantity());
+                                        newDetail.setPrice(detail.getPrice());
+                                        newDetail.setIsDeleted(false);
+                                        invoiceDetailRepository.save(newDetail);
+                                        targetDetails.add(newDetail); // <--- THÊM DÒNG NÀY
+                                        detailsToRemove.add(detail);
                                 }
-
                         }
                         // Xóa các InvoiceDetail cũ đã cộng dồn
                         for (InvoiceDetailEntity detail : detailsToRemove) {
