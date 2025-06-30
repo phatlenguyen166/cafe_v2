@@ -79,6 +79,15 @@ document.addEventListener("DOMContentLoaded", function () {
           status === "OCCUPIED" || status === "RESERVED"
         );
       }
+      // Bật/tắt nút xem bàn: chỉ cho xem nếu KHÔNG phải bàn trống
+      if (viewTableBtn) {
+        viewTableBtn.disabled = status === "AVAILABLE";
+      }
+      // Bật/tắt nút thanh toán: chỉ cho phép với bàn đang sử dụng
+      const openPaymentModalBtn = document.getElementById("openPaymentModal");
+      if (openPaymentModalBtn) {
+        openPaymentModalBtn.disabled = status !== "OCCUPIED";
+      }
     });
   });
 
@@ -317,5 +326,35 @@ document.addEventListener("DOMContentLoaded", function () {
         viewTableModal.classList.add("hidden");
       });
     });
+  }
+
+  // Mở modal thanh toán khi nhấn nút "Thanh toán"
+  const openPaymentModalBtn = document.getElementById("openPaymentModal");
+  const paymentModal = document.getElementById("paymentModal");
+  const closePaymentModalBtn = document.getElementById("closePaymentModal");
+
+  if (openPaymentModalBtn && paymentModal) {
+    openPaymentModalBtn.addEventListener("click", function () {
+      if (!selectedTable) {
+        alert("Vui lòng chọn bàn trước!");
+        return;
+      }
+      // TODO: Render dữ liệu món, tổng tiền, tên bàn vào modal nếu cần
+      paymentModal.classList.remove("hidden");
+    });
+  }
+
+  if (closePaymentModalBtn && paymentModal) {
+    closePaymentModalBtn.addEventListener("click", function () {
+      paymentModal.classList.add("hidden");
+    });
+  }
+
+  if (
+    paymentModal &&
+    typeof selectedTableId !== "undefined" &&
+    window.location.pathname.includes("/sale/payment")
+  ) {
+    paymentModal.classList.remove("hidden");
   }
 });

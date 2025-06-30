@@ -36,8 +36,8 @@
         <div class="grid grid-cols-4 gap-2 mb-4">
           <div
             th:each="table : ${listTables}"
-            th:classappend="${table.status.name() == 'AVAILABLE'} ? 'bg-white' : (${table.status.name() == 'OCCUPIED'} ? 'bg-gray-300' : 'bg-yellow-200')"
-            class="table-item border border-gray-300 rounded flex items-center justify-center h-20 font-semibold text-center flex-col cursor-pointer relative"
+            th:classappend="${table.status.name() == 'AVAILABLE'} ? 'bg-white' : (${table.status.name() == 'OCCUPIED'} ? 'bg-gray-200' : 'bg-yellow-100')"
+            class="table-item border border-gray-300 rounded-xl shadow-md flex items-center justify-center h-24 font-semibold text-center flex-col cursor-pointer relative transition duration-200 hover:shadow-xl hover:border-blue-400 hover:scale-105"
             th:attr="data-id=${table.id},data-status=${table.status.name()}"
           >
             <span th:text="${table.tableName}">Bàn</span>
@@ -107,19 +107,148 @@
         <div class="flex flex-wrap gap-2 justify-center items-center">
           <button
             type="button"
-            class="px-4 py-1 bg-gray-200 rounded border border-gray-400"
             id="openMenuModal"
+            class="px-4 py-1 rounded border font-semibold transition bg-green-500 text-white border-green-600 hover:bg-green-600 hover:shadow disabled:bg-green-200 disabled:text-green-400 disabled:border-green-200 disabled:cursor-not-allowed"
           >
             Chọn thực đơn
           </button>
-          <button class="px-4 py-1 bg-gray-200 rounded border border-gray-400">
-            Thanh toán.....
+          <button
+            id="openPaymentModal"
+            type="button"
+            class="px-4 py-1 rounded border font-semibold transition bg-blue-500 text-white border-blue-600 hover:bg-blue-600 hover:shadow disabled:bg-blue-200 disabled:text-blue-400 disabled:border-blue-200 disabled:cursor-not-allowed"
+          >
+            Thanh toán
           </button>
-          <button class="px-4 py-1 bg-gray-200 rounded border border-gray-400">
+          <!-- <button
+            type="button"
+            class="px-4 py-1 rounded border font-semibold transition bg-gray-400 text-white border-gray-500 hover:bg-gray-500 hover:shadow disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed"
+            disabled
+          >
             In ấn.....
-          </button>
+          </button> -->
         </div>
       </div>
+
+      <!-- Modal thanh toán bàn -->
+      <div
+        id="paymentModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
+      >
+        <div
+          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md relative"
+        >
+          <div class="mb-6 flex items-center justify-between min-h-[48px]">
+            <div
+              class="text-lg font-bold text-blue-700 flex items-center gap-2"
+            >
+              <svg
+                class="w-6 h-6 text-blue-500"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M8 17l4 4 4-4m0-5V3m-8 9v6a2 2 0 002 2h4a2 2 0 002-2v-6"
+                ></path>
+              </svg>
+              <span id="paymentModalTitle"
+                >Thanh toán bàn
+                <span id="paymentTableName" th:text="${paymentTableName}"
+                  >Tên bàn</span
+                ></span
+              >
+            </div>
+            <button
+              type="button"
+              id="closePaymentModal"
+              class="text-gray-400 hover:text-red-500 transition"
+              title="Đóng"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+          <div class="mb-4">
+            <table class="w-full border mb-2 text-sm bg-gray-50 rounded">
+              <thead>
+                <tr class="bg-gray-100">
+                  <th class="border px-2 py-1 text-left">Tên món</th>
+                  <th class="border px-2 py-1 text-center">SL</th>
+                  <th class="border px-2 py-1 text-center">Đơn giá</th>
+                  <th class="border px-2 py-1 text-right">Thành tiền</th>
+                </tr>
+              </thead>
+              <tbody id="paymentMenuList">
+                <tr th:each="detail : ${invoiceDetails}">
+                  <td
+                    class="border px-2 py-1"
+                    th:text="${detail.menuItem.itemName}"
+                  >
+                    Tên món
+                  </td>
+                  <td
+                    class="border px-2 py-1 text-center"
+                    th:text="${detail.quantity}"
+                  >
+                    SL
+                  </td>
+                  <td
+                    class="border px-2 py-1 text-right"
+                    th:text="${detail.price}"
+                  >
+                    0 đ
+                  </td>
+                  <td
+                    class="border px-2 py-1 text-right"
+                    th:text="${detail.quantity * detail.price}"
+                  >
+                    0 đ
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(invoiceDetails)}">
+                  <td colspan="3" class="text-center text-gray-400 py-2">
+                    Chưa có món nào
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="flex justify-end font-semibold text-base">
+              Tổng:
+              <span
+                class="ml-2 text-blue-700"
+                id="paymentTotal"
+                th:text="${#numbers.formatDecimal(paymentTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"
+                >0 đ</span
+              >
+            </div>
+          </div>
+          <form id="paymentForm" class="space-y-4">
+            <div class="flex gap-3 justify-center mt-2">
+              <button
+                type="submit"
+                class="bg-blue-500 text-white px-5 py-1.5 rounded font-semibold border border-blue-600 hover:bg-blue-600 hover:shadow transition"
+              >
+                Thanh toán
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- End modal thanh toán bàn -->
 
       <!-- Modal xem thông tin bàn -->
       <div
@@ -483,6 +612,9 @@
         style="display: none"
       >
         <input type="hidden" name="tableId" id="viewTableIdInput" />
+      </form>
+      <form id="paymentFormHidden" method="get" th:action="@{/sale/payment}">
+        <input type="hidden" name="tableId" id="paymentTableIdInput" />
       </form>
     </div>
   </body>

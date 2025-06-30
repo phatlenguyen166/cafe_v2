@@ -6,8 +6,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.validation.BindingResult;
 
@@ -19,6 +19,7 @@ import com.viettridao.cafe.dto.response.table.TableResponse;
 import com.viettridao.cafe.model.InvoiceDetailEntity;
 import com.viettridao.cafe.model.InvoiceEntity;
 import com.viettridao.cafe.model.ReservationEntity;
+import com.viettridao.cafe.model.TableEntity;
 import com.viettridao.cafe.service.InvoiceDetailService;
 import com.viettridao.cafe.service.InvoiceService;
 import com.viettridao.cafe.service.MenuItemService;
@@ -179,4 +180,34 @@ public class TableController extends BaseController {
         }
     }
 
+    // Render dữ liệu hóa đơn vào modal thanh toán
+    @GetMapping("/sale/payment")
+    public String showPaymentModal(@RequestParam("tableId") Integer tableId, Model model) {
+
+        TableEntity table = tableService.getTableById(tableId);
+        InvoiceEntity invoice = invoiceService.getByTableId(tableId);
+        List<InvoiceDetailEntity> invoiceDetails = invoice.getInvoiceDetails();
+
+        model.addAttribute("invoiceDetails", invoiceDetails);
+        model.addAttribute("paymentTotal", invoice.getTotalAmount());
+        model.addAttribute("paymentTableName", table.getTableName());
+        model.addAttribute("selectedTableId", tableId);
+        model.addAttribute("listTables", tableService.getAllTables());
+
+        return "tables/table";
+    }
+
+    // // Xử lý thanh toán (POST)
+    // @PostMapping("/sale/payment")
+    // public String processPayment(@RequestParam("tableId") Integer tableId, Model
+    // model) {
+    // try {
+    // invoiceService.payInvoice(tableId);
+    // model.addAttribute("successMessage", "Thanh toán thành công!");
+    // } catch (Exception e) {
+    // model.addAttribute("errorMessage", "Thanh toán thất bại: " + e.getMessage());
+    // }
+    // // Sau khi thanh toán, reload lại trang danh sách bàn
+    // return "redirect:/sale";
+    // }
 }

@@ -101,4 +101,10 @@ public class TableSerivceImpl implements TableSerivce {
                                 .toList();
         }
 
+        @Override
+        public TableEntity getTableById(Integer tableId) {
+                return tableRepository.findById(tableId)
+                                .orElseThrow(() -> new RuntimeException("Không tìm thấy bàn với ID: " + tableId));
+        }
+
 }
