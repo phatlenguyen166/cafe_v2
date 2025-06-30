@@ -236,7 +236,13 @@
               >
             </div>
           </div>
-          <form id="paymentForm" class="space-y-4">
+          <form
+            id="paymentForm"
+            class="space-y-4"
+            method="post"
+            th:action="@{/sale/payment}"
+          >
+            <input type="hidden" name="tableId" th:value="${selectedTableId}" />
             <div class="flex gap-3 justify-center mt-2">
               <button
                 type="submit"

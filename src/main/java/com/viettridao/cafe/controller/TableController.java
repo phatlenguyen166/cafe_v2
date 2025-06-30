@@ -187,7 +187,10 @@ public class TableController extends BaseController {
         TableEntity table = tableService.getTableById(tableId);
         InvoiceEntity invoice = invoiceService.getByTableId(tableId);
         List<InvoiceDetailEntity> invoiceDetails = invoice.getInvoiceDetails();
-
+        for (InvoiceDetailEntity invoiceDetailEntity : invoiceDetails) {
+            System.out.println("-------Invoice Details: " + invoiceDetailEntity);
+        }
+        System.out.println("---------Total Amount: " + invoice.getTotalAmount());
         model.addAttribute("invoiceDetails", invoiceDetails);
         model.addAttribute("paymentTotal", invoice.getTotalAmount());
         model.addAttribute("paymentTableName", table.getTableName());
@@ -197,17 +200,15 @@ public class TableController extends BaseController {
         return "tables/table";
     }
 
-    // // Xử lý thanh toán (POST)
-    // @PostMapping("/sale/payment")
-    // public String processPayment(@RequestParam("tableId") Integer tableId, Model
-    // model) {
-    // try {
-    // invoiceService.payInvoice(tableId);
-    // model.addAttribute("successMessage", "Thanh toán thành công!");
-    // } catch (Exception e) {
-    // model.addAttribute("errorMessage", "Thanh toán thất bại: " + e.getMessage());
-    // }
-    // // Sau khi thanh toán, reload lại trang danh sách bàn
-    // return "redirect:/sale";
-    // }
+    // Xử lý thanh toán (POST)
+    @PostMapping("/sale/payment")
+    public String processPayment(@RequestParam("tableId") Integer tableId, RedirectAttributes redirectAttributes) {
+        try {
+            invoiceService.checkout(tableId);
+            redirectAttributes.addFlashAttribute("successMessage", "Thanh toán thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Thanh toán thất bại: " + e.getMessage());
+        }
+        return "redirect:/sale";
+    }
 }

@@ -315,7 +315,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Tự động mở modal xem bàn nếu có biến selectedTableId (render từ backend)
   const selectedTableId = document.body.getAttribute("data-selected-table-id");
-  if (selectedTableId && viewTableModal) {
+  if (
+    selectedTableId &&
+    viewTableModal &&
+    !window.location.pathname.includes("/sale/payment")
+  ) {
     viewTableModal.classList.remove("hidden");
   }
 
@@ -339,8 +343,8 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("Vui lòng chọn bàn trước!");
         return;
       }
-      // TODO: Render dữ liệu món, tổng tiền, tên bàn vào modal nếu cần
-      paymentModal.classList.remove("hidden");
+      document.getElementById("paymentTableIdInput").value = selectedTable;
+      document.getElementById("paymentFormHidden").submit();
     });
   }
 
