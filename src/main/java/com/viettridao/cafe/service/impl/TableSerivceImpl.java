@@ -104,7 +104,9 @@ public class TableSerivceImpl implements TableSerivce {
 
                         // Gộp các chi tiết hóa đơn từ tất cả các hóa đơn nguồn, cộng dồn số lượng món
                         // trùng
+                        Map<Integer, Integer> menuItemIdToQuantity = new HashMap<>();
                         Map<Integer, InvoiceDetailEntity> menuItemIdToDetail = new HashMap<>();
+
                         for (TableEntity source : sourceTables) {
                                 InvoiceEntity sourceInvoice = sourceInvoices.get(source);
                                 List<InvoiceDetailEntity> sourceDetails = sourceInvoice.getInvoiceDetails();
@@ -112,33 +114,40 @@ public class TableSerivceImpl implements TableSerivce {
                                         sourceDetails = new ArrayList<>();
                                 for (InvoiceDetailEntity detail : sourceDetails) {
                                         int menuItemId = detail.getMenuItem().getId();
-                                        if (menuItemIdToDetail.containsKey(menuItemId)) {
-                                                // Nếu đã có món này, cộng dồn số lượng
-                                                InvoiceDetailEntity existed = menuItemIdToDetail.get(menuItemId);
-                                                existed.setQuantity(existed.getQuantity() + detail.getQuantity());
-                                        } else {
-                                                // Nếu chưa có, tạo mới đối tượng tạm (chưa lưu DB)
+                                        // Cộng dồn quantity
+                                        menuItemIdToQuantity.put(menuItemId,
+                                                        menuItemIdToQuantity.getOrDefault(menuItemId, 0)
+                                                                        + detail.getQuantity());
+                                        // Lưu lại 1 detail mẫu để lấy thông tin menu, price
+                                        if (!menuItemIdToDetail.containsKey(menuItemId)) {
                                                 InvoiceDetailEntity temp = new InvoiceDetailEntity();
                                                 temp.setMenuItem(detail.getMenuItem());
-                                                temp.setQuantity(detail.getQuantity());
                                                 temp.setPrice(detail.getPrice());
-                                                temp.setIsDeleted(false);
                                                 menuItemIdToDetail.put(menuItemId, temp);
                                         }
-                                        // Xóa chi tiết hóa đơn cũ
                                         invoiceDetailRepository.delete(detail);
                                 }
                         }
+
                         // Sau khi đã cộng dồn, tạo mới các InvoiceDetailEntity cho hóa đơn mới
-                        for (InvoiceDetailEntity temp : menuItemIdToDetail.values()) {
+                        for (Map.Entry<Integer, Integer> entry : menuItemIdToQuantity.entrySet()) {
+                                Integer menuItemId = entry.getKey();
+                                Integer totalQuantity = entry.getValue();
+                                InvoiceDetailEntity sample = menuItemIdToDetail.get(menuItemId);
+
                                 InvoiceDetailEntity newDetail = new InvoiceDetailEntity();
-                                newDetail.setId(new InvoiceKey(targetInvoice.getId(), temp.getMenuItem().getId()));
+                                newDetail.setId(new InvoiceKey(targetInvoice.getId(), menuItemId));
                                 newDetail.setInvoice(targetInvoice);
-                                newDetail.setMenuItem(temp.getMenuItem());
-                                newDetail.setQuantity(temp.getQuantity());
-                                newDetail.setPrice(temp.getPrice());
+                                newDetail.setMenuItem(sample.getMenuItem());
+                                newDetail.setQuantity(totalQuantity);
+                                newDetail.setPrice(sample.getPrice());
                                 newDetail.setIsDeleted(false);
+                                System.out.println("--------------------------");
+                                System.out.println("menuItemId: " + menuItemId);
+                                System.out.println("totalQuantity: " + totalQuantity);
+
                                 invoiceDetailRepository.save(newDetail);
+
                         }
                 } else {
                         // Bàn đích là một trong các bàn nguồn
@@ -177,28 +186,14 @@ public class TableSerivceImpl implements TableSerivce {
                                         existed.setQuantity(existed.getQuantity() + detail.getQuantity());
                                         invoiceDetailRepository.save(existed);
                                         detailsToRemove.add(detail); // sẽ xóa detail này sau
-                                } else {
-                                        // Tạo mới InvoiceDetailEntity cho hóa đơn mới
-                                        InvoiceDetailEntity newDetail = new InvoiceDetailEntity();
-                                        newDetail.setId(new InvoiceKey(targetInvoice.getId(),
-                                                        detail.getMenuItem().getId())); // để Hibernate tự sinh ID mới
-                                        newDetail.setInvoice(targetInvoice);
-                                        newDetail.setMenuItem(detail.getMenuItem());
-                                        newDetail.setQuantity(detail.getQuantity());
-                                        newDetail.setPrice(detail.getPrice());
-                                        newDetail.setIsDeleted(false); // nếu có trường này
-                                        // ...set các trường khác nếu có...
-                                        invoiceDetailRepository.save(newDetail);
-
-                                        // Xóa chi tiết hóa đơn cũ
-                                        invoiceDetailRepository.delete(detail);
                                 }
+
                         }
                         // Xóa các InvoiceDetail cũ đã cộng dồn
                         for (InvoiceDetailEntity detail : detailsToRemove) {
                                 invoiceDetailRepository.delete(detail);
                         }
-
+                        // --------------------
                         // Xóa reservation cũ
                         ReservationEntity sourceReservation = sourceReservations.get(source);
                         reservationRepository.delete(sourceReservation);
