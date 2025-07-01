@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.mapping.Table;
 import org.springframework.stereotype.Service;
 
 import com.viettridao.cafe.common.InvoiceStatus;
@@ -24,14 +23,14 @@ import com.viettridao.cafe.repository.InvoiceDetailRepository;
 import com.viettridao.cafe.repository.InvoiceRepository;
 import com.viettridao.cafe.repository.ReservationRepository;
 import com.viettridao.cafe.repository.TableRepository;
-import com.viettridao.cafe.service.TableSerivce;
+import com.viettridao.cafe.service.TableService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class TableSerivceImpl implements TableSerivce {
+public class TableServiceImpl implements TableService {
 
         private final TableRepository tableRepository;
         private final TableMapper tableMapper;
@@ -111,9 +110,6 @@ public class TableSerivceImpl implements TableSerivce {
                 for (InvoiceDetailEntity detail : targetDetails) {
                         targetTotal += detail.getQuantity() * detail.getPrice();
                 }
-                targetInvoice.setTotalAmount(targetTotal);
-                invoiceRepository.save(targetInvoice);
-
                 targetInvoice.setTotalAmount(targetTotal);
                 invoiceRepository.save(targetInvoice);
 

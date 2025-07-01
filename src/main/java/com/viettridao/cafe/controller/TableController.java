@@ -26,7 +26,7 @@ import com.viettridao.cafe.service.InvoiceDetailService;
 import com.viettridao.cafe.service.InvoiceService;
 import com.viettridao.cafe.service.MenuItemService;
 import com.viettridao.cafe.service.ReservationService;
-import com.viettridao.cafe.service.TableSerivce;
+import com.viettridao.cafe.service.TableService;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -36,7 +36,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TableController extends BaseController {
 
-    private final TableSerivce tableService;
+    private final TableService tableService;
     private final ReservationService reservationService;
     private final MenuItemService menuItemService;
     private final InvoiceDetailService invoiceDetailService;

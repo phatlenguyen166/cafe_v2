@@ -8,7 +8,7 @@ import com.viettridao.cafe.dto.request.table.SwitchTableRequest;
 import com.viettridao.cafe.dto.response.table.TableResponse;
 import com.viettridao.cafe.model.TableEntity;
 
-public interface TableSerivce {
+public interface TableService {
     List<TableResponse> getAllTables();
 
     TableResponse switchTable(SwitchTableRequest request);
