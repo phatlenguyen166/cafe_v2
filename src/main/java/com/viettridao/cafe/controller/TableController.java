@@ -1,6 +1,8 @@
 package com.viettridao.cafe.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -180,6 +182,56 @@ public class TableController extends BaseController {
         }
     }
 
+    @GetMapping("/sale/split-table")
+    public String showSplitModal(@RequestParam(value = "tableId", required = false) Integer tableId, Model model) {
+        InvoiceEntity invoice = invoiceService.getByTableId(tableId);
+        List<InvoiceDetailEntity> invoiceDetails = invoice.getInvoiceDetails();
+        for (InvoiceDetailEntity invoiceDetailEntity : invoiceDetails) {
+            System.out.println("-------Invoice Details: " + invoiceDetailEntity);
+        }
+        model.addAttribute("invoice", invoice);
+        model.addAttribute("invoiceDetails", invoiceDetails);
+        model.addAttribute("selectedTableId", tableId);
+        model.addAttribute("listTables", tableService.getAllTables());
+        model.addAttribute("modalType", "split");
+        return "tables/table";
+    }
+
+    @PostMapping("/sale/split-table")
+    public String splitTable(
+            @RequestParam("sourceTableId") Integer sourceTableId,
+            @RequestParam("targetTableId") Integer targetTableId,
+            @RequestParam Map<String, String> allParams,
+            RedirectAttributes redirectAttributes) {
+        try {
+            // Lấy map menuItemId -> splitQuantity từ allParams
+            Map<Integer, Integer> menuItemIdToQuantity = new HashMap<>();
+            for (Map.Entry<String, String> entry : allParams.entrySet()) {
+                String key = entry.getKey();
+                if (key.startsWith("splitQuantity_")) {
+                    Integer menuItemId = Integer.valueOf(key.replace("splitQuantity_", ""));
+                    Integer quantity = Integer.valueOf(entry.getValue());
+                    menuItemIdToQuantity.put(menuItemId, quantity);
+                }
+            }
+
+            if (menuItemIdToQuantity.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn ít nhất một món để tách!");
+                return "redirect:/sale";
+            }
+
+            tableService.splitTable(sourceTableId, targetTableId, menuItemIdToQuantity);
+            redirectAttributes.addFlashAttribute("successMessage", "Tách bàn thành công!");
+        } catch (RuntimeException ex) {
+            ex.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Đã xảy ra lỗi khi tách bàn.");
+        }
+        return "redirect:/sale";
+    }
+
     // Render dữ liệu hóa đơn vào modal thanh toán
     @GetMapping("/sale/payment")
     public String showPaymentModal(@RequestParam("tableId") Integer tableId, Model model) {
@@ -239,4 +291,5 @@ public class TableController extends BaseController {
         }
         return "redirect:/sale";
     }
+
 }

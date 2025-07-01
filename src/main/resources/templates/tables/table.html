@@ -10,12 +10,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script th:src="@{/js/table/table.js}" defer></script>
   </head>
-  <body th:attr="data-selected-table-id=${selectedTableId}">
+  <body
+    th:attr="data-selected-table-id=${selectedTableId},data-modal=${modalType}"
+  >
     <div
       layout:fragment="content"
       class="relative z-10 min-h-full flex justify-center w-full p-6"
     >
-      <div class="w-full max-w-4xl bg-gray-100 rounded-lg shadow p-6">
+      <div class="w-full h-full max-w-7xl bg-gray-100 rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold mb-4">Quản lý bán hàng</h2>
 
         <!-- Thông báo -->
@@ -80,10 +82,12 @@
             Chuyển bàn
           </button>
           <button
+            id="openSplitTableModal"
             class="px-4 py-1 rounded border font-semibold transition bg-gray-200 text-gray-700 border-gray-400 hover:bg-gray-300 hover:shadow disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed"
           >
             Tách bàn
           </button>
+
           <button
             id="openMergeTableModal"
             class="px-4 py-1 rounded border font-semibold transition bg-gray-200 text-gray-700 border-gray-400 hover:bg-gray-300 hover:shadow disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed"
@@ -123,95 +127,97 @@
         </div>
       </div>
 
-      <!-- Modal gộp bàn -->
+      <!-- Modal tách bàn -->
       <div
-        id="mergeTableModal"
+        id="splitTableModal"
         class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden"
       >
         <div class="bg-white rounded shadow-lg p-6 min-w-[500px] max-w-[95vw]">
-          <div class="mb-4 font-semibold text-base">Gộp bàn</div>
+          <div class="mb-4 font-semibold text-base">
+            Tách bàn
+            <span id="splitSourceTableName" class="text-blue-600"></span>
+          </div>
           <form
-            id="mergeTableForm"
+            id="splitTableForm"
             method="post"
-            th:action="@{/sale/merge-table}"
+            th:action="@{/sale/split-table}"
           >
-            <div class="flex gap-6 justify-center mb-4">
-              <!-- Danh sách bàn cần gộp -->
-              <div>
-                <div class="font-medium mb-2">Chọn các bàn cần gộp</div>
-                <div
-                  class="border rounded p-2 max-h-48 min-w-[140px] overflow-y-auto"
-                >
-                  <div th:each="table : ${listTables}">
-                    <label
-                      class="flex items-center gap-2 mb-1"
-                      th:if="${table.status.name() == 'OCCUPIED'}"
-                    >
-                      <input
-                        type="checkbox"
-                        class="merge-table-checkbox"
-                        name="mergeTableIds"
-                        th:value="${table.id}"
-                      />
-                      <span th:text="${table.tableName}">Bàn</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <!-- Mũi tên chuyển -->
-              <div class="flex items-center justify-center">
-                <span class="text-xl font-bold text-blue-500"
-                  >&gt;&gt;&gt;&gt;</span
-                >
-              </div>
-              <!-- Danh sách bàn gộp đến -->
-              <div>
-                <div class="font-medium mb-2">Chọn bàn gộp đến</div>
-                <div
-                  class="border rounded p-2 max-h-48 min-w-[140px] overflow-y-auto"
-                >
-                  <div th:each="table : ${listTables}">
-                    <label
-                      class="flex items-center gap-2 mb-1"
-                      th:if="${table.status.name() == 'OCCUPIED' or table.status.name() == 'AVAILABLE'}"
-                      th:attr="data-status=${table.status.name()}"
-                    >
-                      <input
-                        type="radio"
-                        class="merge-table-radio"
-                        name="targetTableId"
-                        th:value="${table.id}"
-                        required
-                      />
-                      <span th:text="${table.tableName}">Bàn</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
+            <!-- Chọn bàn đích -->
+            <div class="mb-3">
+              <label class="font-medium">Chọn bàn nhận món</label>
+              <select
+                name="targetTableId"
+                class="border rounded px-2 py-1 w-full"
+                required
+              >
+                <option value="" disabled selected>-- Chọn bàn trống --</option>
+                <option
+                  th:each="table : ${listTables}"
+                  th:if="${table.status.name() == 'AVAILABLE'}"
+                  th:value="${table.id}"
+                  th:text="${table.tableName}"
+                ></option>
+              </select>
             </div>
+            <!-- Danh sách món và số lượng muốn tách -->
+            <div class="mb-3">
+              <label class="font-medium">Chọn món và số lượng muốn tách</label>
+              <table class="w-full border mb-2 text-sm bg-gray-50 rounded">
+                <thead>
+                  <tr class="bg-gray-100">
+                    <th class="border px-2 py-1">Tên món</th>
+                    <th class="border px-2 py-1 text-center">SL hiện tại</th>
+                    <th class="border px-2 py-1 text-center">SL tách</th>
+                  </tr>
+                </thead>
+                <tbody id="splitMenuList">
+                  <tr th:each="detail : ${invoiceDetails}">
+                    <td
+                      class="border px-2 py-1"
+                      th:text="${detail.menuItem.itemName}"
+                    >
+                      Tên món
+                    </td>
+                    <td
+                      class="border px-2 py-1 text-center"
+                      th:text="${detail.quantity}"
+                    >
+                      SL
+                    </td>
+                    <td class="border px-2 py-1 text-center">
+                      <input
+                        type="number"
+                        min="0"
+                        th:attr="max=${detail.quantity}"
+                        th:name="'splitQuantity_' + ${detail.menuItem.id}"
+                        class="w-16 border rounded px-1 py-0.5"
+                        value="0"
+                      />
+                    </td>
+                  </tr>
+                  <tr th:if="${#lists.isEmpty(invoiceDetails)}">
+                    <td colspan="3" class="text-center text-gray-400 py-2">
+                      Không có món nào để tách
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <input
+              type="hidden"
+              name="sourceTableId"
+              id="splitSourceTableIdInput"
+            />
             <div class="flex gap-3 justify-center mt-2">
               <button
                 type="submit"
                 class="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-8 py-2 rounded-lg font-bold border-none shadow-lg hover:from-blue-600 hover:to-blue-800 transition"
               >
-                <svg
-                  class="inline w-5 h-5 mr-2 -mt-1"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M4 12h16m-7-7l7 7-7 7"
-                  />
-                </svg>
-                Gộp bàn
+                Tách bàn
               </button>
               <button
                 type="button"
-                id="closeMergeTableModal"
+                id="closeSplitTableModal"
                 class="bg-gray-200 px-8 py-2 rounded-lg font-semibold border border-gray-400 hover:bg-gray-300 shadow transition"
               >
                 Hủy
@@ -220,7 +226,6 @@
           </form>
         </div>
       </div>
-      <!-- End modal gộp bàn -->
 
       <!-- Modal thanh toán bàn -->
       <div
@@ -422,7 +427,10 @@
                   </tr>
                 </thead>
                 <tbody id="viewTableMenuList">
-                  <tr th:each="detail : ${listMenuDetails}">
+                  <tr
+                    th:each="detail : ${listMenuDetails}"
+                    th:attr="data-menu-item-id=${detail.menuItem.id}"
+                  >
                     <td
                       class="border px-2 py-1"
                       th:text="${detail.menuItem.itemName}"
@@ -703,6 +711,105 @@
       </form>
       <!-- End form đặt bàn  -->
 
+      <!-- Modal gộp bàn -->
+      <div
+        id="mergeTableModal"
+        class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden"
+      >
+        <div class="bg-white rounded shadow-lg p-6 min-w-[500px] max-w-[95vw]">
+          <div class="mb-4 font-semibold text-base">Gộp bàn</div>
+          <form
+            id="mergeTableForm"
+            method="post"
+            th:action="@{/sale/merge-table}"
+          >
+            <div class="flex gap-6 justify-center mb-4">
+              <!-- Danh sách bàn cần gộp -->
+              <div>
+                <div class="font-medium mb-2">Chọn các bàn cần gộp</div>
+                <div
+                  class="border rounded p-2 max-h-48 min-w-[140px] overflow-y-auto"
+                >
+                  <div th:each="table : ${listTables}">
+                    <label
+                      class="flex items-center gap-2 mb-1"
+                      th:if="${table.status.name() == 'OCCUPIED'}"
+                    >
+                      <input
+                        type="checkbox"
+                        class="merge-table-checkbox"
+                        name="mergeTableIds"
+                        th:value="${table.id}"
+                      />
+                      <span th:text="${table.tableName}">Bàn</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <!-- Mũi tên chuyển -->
+              <div class="flex items-center justify-center">
+                <span class="text-xl font-bold text-blue-500"
+                  >&gt;&gt;&gt;&gt;</span
+                >
+              </div>
+              <!-- Danh sách bàn gộp đến -->
+              <div>
+                <div class="font-medium mb-2">Chọn bàn gộp đến</div>
+                <div
+                  class="border rounded p-2 max-h-48 min-w-[140px] overflow-y-auto"
+                >
+                  <div th:each="table : ${listTables}">
+                    <label
+                      class="flex items-center gap-2 mb-1"
+                      th:if="${table.status.name() == 'OCCUPIED' or table.status.name() == 'AVAILABLE'}"
+                      th:attr="data-status=${table.status.name()}"
+                    >
+                      <input
+                        type="radio"
+                        class="merge-table-radio"
+                        name="targetTableId"
+                        th:value="${table.id}"
+                        required
+                      />
+                      <span th:text="${table.tableName}">Bàn</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-3 justify-center mt-2">
+              <button
+                type="submit"
+                class="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-8 py-2 rounded-lg font-bold border-none shadow-lg hover:from-blue-600 hover:to-blue-800 transition"
+              >
+                <svg
+                  class="inline w-5 h-5 mr-2 -mt-1"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4 12h16m-7-7l7 7-7 7"
+                  />
+                </svg>
+                Gộp bàn
+              </button>
+              <button
+                type="button"
+                id="closeMergeTableModal"
+                class="bg-gray-200 px-8 py-2 rounded-lg font-semibold border border-gray-400 hover:bg-gray-300 shadow transition"
+              >
+                Hủy
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- End modal gộp bàn -->
+
       <!-- Form ẩn để xem thông tin bàn -->
       <form
         id="viewTableForm"
@@ -714,6 +821,14 @@
       </form>
       <form id="paymentFormHidden" method="get" th:action="@{/sale/payment}">
         <input type="hidden" name="tableId" id="paymentTableIdInput" />
+      </form>
+      <form
+        id="splitTableGetForm"
+        method="get"
+        th:action="@{/sale/split-table}"
+        style="display: none"
+      >
+        <input type="hidden" name="tableId" id="splitTableGetTableIdInput" />
       </form>
     </div>
   </body>

@@ -43,6 +43,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const openMergeTableModal = document.getElementById("openMergeTableModal");
   const mergeTableModal = document.getElementById("mergeTableModal");
   const closeMergeTableModal = document.getElementById("closeMergeTableModal");
+  const openSplitTableModal = document.getElementById("openSplitTableModal");
+  const splitTableModal = document.getElementById("splitTableModal");
+  const closeSplitTableModal = document.getElementById("closeSplitTableModal");
 
   tableItems.forEach((item) => {
     item.addEventListener("click", function () {
@@ -90,6 +93,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const openPaymentModalBtn = document.getElementById("openPaymentModal");
       if (openPaymentModalBtn) {
         openPaymentModalBtn.disabled = status !== "OCCUPIED";
+      }
+      const splitTableBtn = document.getElementById("openSplitTableModal");
+      if (splitTableBtn) {
+        splitTableBtn.disabled = status !== "OCCUPIED";
       }
     });
   });
@@ -318,10 +325,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Tự động mở modal xem bàn nếu có biến selectedTableId (render từ backend)
   const selectedTableId = document.body.getAttribute("data-selected-table-id");
+  const modalType = document.body.getAttribute("data-modal");
+
   if (
     selectedTableId &&
     viewTableModal &&
-    !window.location.pathname.includes("/sale/payment")
+    window.location.pathname.includes("/sale/view")
   ) {
     viewTableModal.classList.remove("hidden");
   }
@@ -415,5 +424,34 @@ document.addEventListener("DOMContentLoaded", function () {
       mergeTableModal.classList.remove("hidden");
       updateTargetTableList();
     });
+  }
+
+  if (openSplitTableModal && splitTableModal && closeSplitTableModal) {
+    openSplitTableModal.addEventListener("click", function () {
+      if (!selectedTable || selectedTableStatus !== "OCCUPIED") {
+        alert("Chỉ có thể tách bàn đang sử dụng!");
+        return;
+      }
+      document.getElementById("splitTableGetTableIdInput").value =
+        selectedTable;
+      document.getElementById("splitTableGetForm").submit();
+    });
+
+    closeSplitTableModal.addEventListener("click", function () {
+      splitTableModal.classList.add("hidden");
+    });
+  }
+  if (
+    typeof selectedTableId !== "undefined" &&
+    splitTableModal &&
+    window.location.pathname.includes("/sale/split")
+  ) {
+    splitTableModal.classList.remove("hidden");
+    const splitSourceTableIdInput = document.getElementById(
+      "splitSourceTableIdInput"
+    );
+    if (splitSourceTableIdInput) {
+      splitSourceTableIdInput.value = selectedTableId;
+    }
   }
 });
