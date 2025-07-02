@@ -4,8 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const toDateInput = document.getElementById("toDate");
 
   addExpenseBtn.addEventListener("click", function () {
-    window.location.href = "/expenses/create";
-    alert("Chức năng thêm chi tiêu sẽ được phát triển");
+    window.location.href = "/expense/create";
   });
 
   // Set min date cho date inputs
@@ -26,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".money-value").forEach(function (el) {
     let value = el.textContent.replace(/\D/g, ""); // Lấy số, bỏ ký tự khác
     if (value) {
-      el.textContent = Number(value).toLocaleString("vi-VN") + " đ";
+      el.textContent = formatMoneyVND(value);
     } else {
       el.textContent = "0 đ";
     }
@@ -34,13 +33,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   document.querySelectorAll(".date-value").forEach(function (el) {
     let value = el.textContent.trim();
-    // Hỗ trợ cả yyyy-MM-dd và yyyy/MM/dd
-    let match = value.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
-    if (match) {
-      let day = match[3].padStart(2, "0");
-      let month = match[2].padStart(2, "0");
-      let year = match[1];
-      el.textContent = `${day}/${month}/${year}`;
-    }
+    el.textContent = formatDateDMY(value);
   });
 });
