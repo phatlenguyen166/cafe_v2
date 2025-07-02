@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.viettridao.cafe.dto.response.report.ReportResponse;
 import com.viettridao.cafe.service.ReportService;
@@ -18,18 +20,28 @@ public class ExpenseController {
     private final ReportService reportService;
 
     @GetMapping("/expense")
-    public String showExpense() {
+    public String showExpense(Model model) {
+        model.addAttribute("totalRevenue", 0L);
+        model.addAttribute("totalExpense", 0L);
+        return "expenses/expense";
+    }
 
-        LocalDate startDate = LocalDate.parse("2025-06-25");
-        LocalDate endDate = LocalDate.parse("2025-06-28");
+    @GetMapping("/expense/by-date-range")
+    public String getReportByDateRange(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate,
+            Model model) {
+        List<ReportResponse> reportList = reportService.getReportByDateRange(LocalDate.parse(startDate),
+                LocalDate.parse(endDate));
 
-        List<ReportResponse> reportResponses = reportService.getReportByDateRange(startDate, endDate);
-
-        for (ReportResponse reportResponse : reportResponses) {
-            System.out.println("Report----------: " + reportResponse.getDateReport());
-            System.out.println("Total Revenue: " + reportResponse.getRevenue());
-            System.out.println("Total Expense: " + reportResponse.getExpense());
+        for (ReportResponse report : reportList) {
+            System.out.println("-----------------------");
+            System.out.println("Date: " + report.getDateReport());
+            System.out.println("Total Revenue: " + report.getRevenue());
+            System.out.println("Total Expense: " + report.getExpense());
         }
+        model.addAttribute("reportList", reportList);
+
         return "expenses/expense";
     }
 

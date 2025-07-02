@@ -31,12 +31,16 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationMapper reservationMapper;
 
+    /**
+     * Hủy đặt bàn cho một bàn cụ thể.
+     */
     @Override
     @Transactional
     public void cancelReservation(Integer tableId) {
         try {
             TableEntity table = tableRepository.findById(tableId)
                     .orElseThrow(() -> new RuntimeException("Table not found"));
+
             InvoiceEntity unpaidInvoice = table.getReservations().stream()
                     .filter(reservation -> Boolean.FALSE.equals(reservation.getIsDeleted()))
                     .filter(reservation -> reservation.getInvoice() != null
@@ -45,31 +49,27 @@ public class ReservationServiceImpl implements ReservationService {
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn chưa thanh toán cho bàn này!"));
 
-            if (unpaidInvoice == null) {
-                throw new RuntimeException("Không tìm thấy hóa đơn chưa thanh toán cho bàn này!");
-            }
-
             ReservationEntity reservationEntity = reservationRepository.findByInvoice(unpaidInvoice);
             if (reservationEntity == null) {
                 throw new RuntimeException("Không tìm thấy chi tiết đặt bàn cho hóa đơn này!");
             }
-            // Cập nhật trạng thái bàn và hóa đơn trước
+
+            // Cập nhật trạng thái bàn và hóa đơn
             table.setStatus(TableStatus.AVAILABLE);
             tableRepository.save(table);
 
             unpaidInvoice.setStatus(InvoiceStatus.CANCELLED);
             invoiceRepository.save(unpaidInvoice);
 
-            // reservationEntity.setIsDeleted(true);
-            // reservationRepository.save(reservationEntity);
             reservationRepository.delete(reservationEntity);
-        } catch (RuntimeException ex) {
-            throw new RuntimeException("Hủy đặt bàn thất bại: " + ex.getMessage(), ex);
         } catch (Exception ex) {
-            throw new RuntimeException("Đã xảy ra lỗi không xác định khi hủy đặt bàn.", ex);
+            throw new RuntimeException("Hủy đặt bàn thất bại: " + ex.getMessage(), ex);
         }
     }
 
+    /**
+     * Tạo mới một đặt bàn.
+     */
     @Override
     @Transactional
     public ReservationResponse createReservation(ReservationRequest request, Integer employeeId) {
@@ -80,14 +80,11 @@ public class ReservationServiceImpl implements ReservationService {
             TableEntity table = tableRepository.findById(request.getTableId())
                     .orElseThrow(() -> new RuntimeException("Table not found"));
 
-            // Kiểm tra trạng thái bàn
-            if (table.getStatus() != TableStatus.AVAILABLE) {
-                throw new RuntimeException("Chỉ có thể đặt bàn với bàn đang trống!");
-            }
+            validateTableAvailable(table);
 
             // Tạo hóa đơn rỗng
             InvoiceEntity invoice = new InvoiceEntity();
-            invoice.setTotalAmount(null);
+            invoice.setTotalAmount(0.0);
             invoice.setCreatedAt(request.getReservationDate());
             invoice.setStatus(InvoiceStatus.UNPAID);
             invoice.setIsDeleted(false);
@@ -111,11 +108,17 @@ public class ReservationServiceImpl implements ReservationService {
             tableRepository.save(table);
 
             return reservationMapper.convertToResponse(reservation);
-        } catch (RuntimeException ex) {
-            throw new RuntimeException("Tạo đặt bàn thất bại: " + ex.getMessage(), ex);
         } catch (Exception ex) {
-            throw new RuntimeException("Đã xảy ra lỗi không xác định khi tạo đặt bàn.", ex);
+            throw new RuntimeException("Tạo đặt bàn thất bại: " + ex.getMessage(), ex);
         }
     }
 
+    /**
+     * Kiểm tra trạng thái bàn có phải là AVAILABLE không.
+     */
+    private void validateTableAvailable(TableEntity table) {
+        if (table.getStatus() != TableStatus.AVAILABLE) {
+            throw new RuntimeException("Chỉ có thể đặt bàn với bàn đang trống!");
+        }
+    }
 }

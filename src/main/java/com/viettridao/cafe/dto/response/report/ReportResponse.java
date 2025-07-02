@@ -2,11 +2,20 @@ package com.viettridao.cafe.dto.response.report;
 
 import java.time.LocalDate;
 
-public interface ReportResponse {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-    LocalDate getDateReport();
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class ReportResponse {
 
-    Double getRevenue();
+    private LocalDate dateReport;
 
-    Double getExpense();
+    private Long revenue;
+
+    private Long expense;
 }
