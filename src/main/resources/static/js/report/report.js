@@ -107,10 +107,22 @@ document.addEventListener("DOMContentLoaded", function () {
     );
   });
 
-  // Date validation
-  fromDateInput.addEventListener("change", function () {
-    toDateInput.min = this.value;
-  });
+  // Format lại số tiền cho các phần tử trong bảng báo cáo (nếu cần)
+  document
+    .querySelectorAll(".text-green-600.font-medium, .text-red-600.font-medium")
+    .forEach(function (el) {
+      let value = el.textContent.replace(/\D/g, "");
+      if (value) {
+        el.textContent = Number(value).toLocaleString("vi-VN") + " đ";
+      }
+    });
+
+  // Đảm bảo ngày bắt đầu không lớn hơn ngày kết thúc
+  if (fromDateInput && toDateInput) {
+    fromDateInput.addEventListener("change", function () {
+      toDateInput.min = this.value;
+    });
+  }
 
   // Initialize with default data
   renderReportTable(reportData["all"]);

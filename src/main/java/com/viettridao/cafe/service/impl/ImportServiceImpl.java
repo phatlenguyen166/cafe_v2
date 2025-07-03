@@ -1,5 +1,8 @@
 package com.viettridao.cafe.service.impl;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.viettridao.cafe.dto.request.import_request.ImportRequest;
@@ -41,6 +44,11 @@ public class ImportServiceImpl implements ImportService {
         productRepository.save(product);
 
         return importRepository.save(importEntity);
+    }
+
+    @Override
+    public List<ImportEntity> getAllByImportDateRange(LocalDate startDate, LocalDate endDate) {
+        return importRepository.findAllByImportDateRange(startDate, endDate);
     }
 
 }
