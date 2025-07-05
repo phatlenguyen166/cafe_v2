@@ -28,4 +28,7 @@ public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Intege
             """, nativeQuery = true)
     List<SearchEmployeeResponse> searchByName(@Param("keyword") String keyword);
 
+    @Query("SELECT e FROM EmployeeEntity e WHERE e.isDeleted = false ORDER BY e.position.salary DESC")
+    List<EmployeeEntity> findAllEmployeeDescSalary();
+
 }

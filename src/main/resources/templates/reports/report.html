@@ -7,7 +7,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Thống kê, báo cáo</title>
-    <script th:src="@{/js/reports/report.js}"></script>
+    <!-- <script th:src="@{/js/report/report.js}"></script> -->
   </head>
   <body>
     <div
@@ -24,7 +24,9 @@
           <!-- Date Range & Report Options Form -->
           <form method="get" th:action="@{/report}" class="mb-6 space-y-4">
             <!-- Report Options -->
-            <div class="flex flex-col md:flex-row md:items-center gap-6">
+            <div
+              class="flex flex-col md:justify-center md:flex-row md:items-center gap-6"
+            >
               <span class="font-medium min-w-max">Chọn mục:</span>
               <div class="flex flex-wrap gap-4">
                 <label class="flex items-center gap-2">
@@ -59,7 +61,7 @@
                   <input
                     type="radio"
                     name="reportType"
-                    value="sales"
+                    value="sale"
                     class="w-4 h-4"
                   />
                   <span class="text-sm">Bán hàng</span>
@@ -68,19 +70,10 @@
                   <input
                     type="radio"
                     name="reportType"
-                    value="revenue"
+                    value="employee"
                     class="w-4 h-4"
                   />
-                  <span class="text-sm">Lương</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="reportType"
-                    value="staff"
-                    class="w-4 h-4"
-                  />
-                  <span class="text-sm">TT nhân viên</span>
+                  <span class="text-sm">TT nhân viên và lương</span>
                 </label>
                 <label class="flex items-center gap-2">
                   <input
@@ -95,16 +88,16 @@
                   <input
                     type="radio"
                     name="reportType"
-                    value="customer"
+                    value="expense"
                     class="w-4 h-4"
                   />
-                  <span class="text-sm">Phi khác</span>
+                  <span class="text-sm">Phí khác</span>
                 </label>
               </div>
             </div>
 
             <!-- Date Range -->
-            <div class="flex flex-wrap items-center gap-4">
+            <div class="flex flex-wrap items-center justify-center gap-4">
               <span class="text-sm font-medium">Từ ngày</span>
               <input
                 type="date"
@@ -137,8 +130,65 @@
             ></div>
           </th:block>
 
+          <th:block th:if="${selectedType == 'export' and exportList != null}">
+            <div
+              th:replace="~{reports/fragments/export-table :: export-table}"
+            ></div>
+          </th:block>
+
+          <th:block
+            th:if="${selectedType == 'import' and importList != null and exportList != null}"
+          >
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <h3 class="font-semibold mb-2 text-center text-blue-700">
+                  Bảng nhập
+                </h3>
+                <div
+                  th:replace="~{reports/fragments/inventory-table :: inventory-table}"
+                ></div>
+              </div>
+              <div>
+                <h3 class="font-semibold mb-2 text-center text-green-700">
+                  Bảng xuất
+                </h3>
+                <div
+                  th:replace="~{reports/fragments/export-table :: export-table}"
+                ></div>
+              </div>
+            </div>
+          </th:block>
+
+          <th:block
+            th:if="${selectedType == 'employee' and employeeList != null}"
+          >
+            <div
+              th:replace="~{reports/fragments/employee-table :: employee-table}"
+            ></div>
+          </th:block>
+
+          <th:block
+            th:if="${selectedType == 'expense' and expenseList != null}"
+          >
+            <div
+              th:replace="~{reports/fragments/expense-table :: expense-table}"
+            ></div>
+          </th:block>
+
+          <th:block th:if="${selectedType == 'sale' and saleList != null}">
+            <div
+              th:replace="~{reports/fragments/sale-table :: sale-table}"
+            ></div>
+          </th:block>
+
+          <th:block th:if="${selectedType == null}">
+            <div class="text-center py-8 text-gray-500 text-lg font-semibold">
+              Chưa có dữ liệu
+            </div>
+          </th:block>
+
           <!-- Export Options -->
-          <div class="grid grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 gap-6">
             <!-- Xuất file -->
             <div class="border-2 border-gray-400 rounded-lg p-4">
               <h3 class="font-semibold mb-4 text-center">— Xuất file —</h3>
@@ -148,15 +198,7 @@
                     id="exportBtn"
                     class="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-medium"
                   >
-                    Xuất tất cả
-                  </button>
-                </div>
-                <div class="pt-2">
-                  <button
-                    id="exportSelectedBtn"
-                    class="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-medium"
-                  >
-                    Xuất mục đã chọn
+                    Xuất file
                   </button>
                 </div>
               </div>

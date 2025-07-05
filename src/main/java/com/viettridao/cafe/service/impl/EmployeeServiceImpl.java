@@ -137,4 +137,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeRepository.searchByName(keyword);
     }
 
+    @Override
+    public List<EmployeeEntity> getAllEmployeeDescSalary() {
+        return employeeRepository.findAllEmployeeDescSalary();
+    }
+
 }

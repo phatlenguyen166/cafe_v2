@@ -1,9 +1,13 @@
 package com.viettridao.cafe.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.viettridao.cafe.common.InvoiceStatus;
 import com.viettridao.cafe.common.TableStatus;
+import com.viettridao.cafe.dto.response.invoice.InvoiceResponse;
 import com.viettridao.cafe.model.InvoiceEntity;
 import com.viettridao.cafe.model.ReservationEntity;
 import com.viettridao.cafe.model.TableEntity;
@@ -45,6 +49,12 @@ public class InvoiceServiceImpl implements InvoiceService {
                 tableRepository.save(table);
                 // Lưu lại thay đổi vào database
                 invoiceRepository.save(invoice);
+        }
+
+        @Override
+        public List<InvoiceEntity> getAllByInvoiceDateBetween(LocalDateTime start, LocalDateTime end) {
+                return invoiceRepository.findAllByInvoiceDateBetween(start, end);
+
         }
 
 }

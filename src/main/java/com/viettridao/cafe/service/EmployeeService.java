@@ -16,4 +16,6 @@ public interface EmployeeService {
     void createEmployee(AddEmployeeRequest request, MultipartFile avatar);
 
     List<SearchEmployeeResponse> searchByName(String keyword);
+
+    List<EmployeeEntity> getAllEmployeeDescSalary();
 }

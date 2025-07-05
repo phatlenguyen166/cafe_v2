@@ -1,6 +1,9 @@
 package com.viettridao.cafe.service;
 
+import java.time.LocalDate;
 import java.util.List;
+
+import org.springframework.data.repository.query.Param;
 
 import com.viettridao.cafe.dto.request.expense.ExpenseRequest;
 import com.viettridao.cafe.dto.response.expense.ExpenseResponse;
@@ -13,4 +16,6 @@ public interface ExpenseService {
     ExpenseResponse createExpense(ExpenseRequest request, Integer accountId);
 
     ExpenseEntity save(ExpenseEntity expenseEntity);
+
+    List<ExpenseEntity> getAllByExpenseDateBetween(LocalDate start, LocalDate end);
 }

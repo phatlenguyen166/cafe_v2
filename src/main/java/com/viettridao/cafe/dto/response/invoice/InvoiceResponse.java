@@ -4,9 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.viettridao.cafe.common.InvoiceStatus;
+import com.viettridao.cafe.dto.response.promotion.PromotionResponse;
 import com.viettridao.cafe.dto.response.reservation.ReservationResponse;
-import com.viettridao.cafe.model.InvoiceDetailEntity;
-import com.viettridao.cafe.model.PromotionEntity;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +18,7 @@ public class InvoiceResponse {
     private LocalDateTime createdAt;
     private InvoiceStatus status;
     private Boolean isDeleted;
-    private PromotionEntity promotion;
+    private PromotionResponse promotion;
     private ReservationResponse reservations;
-    private List<InvoiceDetailEntity> invoiceDetails;
+    private List<InvoiceDetailResponse> invoiceDetails;
 }

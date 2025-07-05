@@ -96,17 +96,6 @@ document.addEventListener("DOMContentLoaded", function () {
     alert(`Xuất file định dạng ${selectedType.toUpperCase()} (Demo)`);
   });
 
-  printBtn.addEventListener("click", function () {
-    const paperSize = document.querySelector("select").value;
-    const printerType = document.querySelectorAll("select")[1].value;
-    const copies = document.querySelector('input[type="number"]').value;
-
-    console.log("Printing:", { paperSize, printerType, copies });
-    alert(
-      `In ${copies} bản trên giấy ${paperSize} với máy ${printerType} (Demo)`
-    );
-  });
-
   // Format lại số tiền cho các phần tử trong bảng báo cáo (nếu cần)
   document
     .querySelectorAll(".text-green-600.font-medium, .text-red-600.font-medium")

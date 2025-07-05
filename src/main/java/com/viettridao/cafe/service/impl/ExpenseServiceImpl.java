@@ -1,5 +1,6 @@
 package com.viettridao.cafe.service.impl;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -46,6 +47,11 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public ExpenseEntity save(ExpenseEntity expenseEntity) {
         return expenseRepository.save(expenseEntity);
+    }
+
+    @Override
+    public List<ExpenseEntity> getAllByExpenseDateBetween(LocalDate start, LocalDate end) {
+        return expenseRepository.findAllByExpenseDateBetween(start, end);
     }
 
     // Implement methods for managing expenses here
