@@ -1,0 +1,30 @@
+name: 🚀 Deploy Spring Boot to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔑 Setup SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 🚀 SSH and deploy Spring Boot
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            git config --global --add safe.directory /projects/cafe_v2
+            cd /projects/cafe_v2
+            git pull origin main
+
+            echo "🔁 Restarting Spring Boot app..."
+            cd target
+            pkill -f 'java.*cafe-0.0.1-SNAPSHOT.jar' || true
+            nohup java -jar cafe-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+            echo "✅ Done"
+          EOF
