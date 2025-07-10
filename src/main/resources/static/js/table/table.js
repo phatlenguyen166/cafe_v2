@@ -254,6 +254,14 @@ document.addEventListener("DOMContentLoaded", function () {
     menuForm.addEventListener("submit", function (e) {
       e.preventDefault();
 
+      // Chuyển tất cả price inputs về dạng số trước khi submit
+      const priceInputs = document.querySelectorAll(".price-input");
+      priceInputs.forEach((input) => {
+        // Remove commas and convert to number
+        const numericValue = input.value.replace(/[^\d]/g, "");
+        input.value = numericValue;
+      });
+
       // Xóa các trường invoiceDetails cũ nếu có
       document
         .querySelectorAll(".dynamic-invoice-detail")
@@ -293,7 +301,8 @@ document.addEventListener("DOMContentLoaded", function () {
             let priceInput = document.createElement("input");
             priceInput.type = "hidden";
             priceInput.name = `invoiceDetails[${idx}].price`;
-            priceInput.value = price;
+            // Đảm bảo price là số nguyên không có dấu phẩy
+            priceInput.value = price.replace(/[^\d]/g, "");
             priceInput.classList.add("dynamic-invoice-detail");
             menuForm.appendChild(priceInput);
 
@@ -304,6 +313,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (idx === 0) {
         alert("Vui lòng chọn ít nhất một món và nhập số lượng > 0!");
+        // Restore formatted values if validation fails
+        formatAllPrices();
         return;
       }
 
@@ -454,4 +465,137 @@ document.addEventListener("DOMContentLoaded", function () {
       splitSourceTableIdInput.value = selectedTableId;
     }
   }
+
+  console.log("Menu modal loaded");
+
+  // Format currency function
+  function formatCurrency(amount) {
+    if (!amount || amount === 0) return "0";
+
+    // Remove any non-digit characters
+    const numericAmount = amount.toString().replace(/[^\d]/g, "");
+
+    if (!numericAmount) return "0";
+
+    // Format with Vietnamese locale (without ₫ symbol for input)
+    return parseInt(numericAmount).toLocaleString("vi-VN");
+  }
+
+  // Format all price inputs
+  function formatAllPrices() {
+    const priceInputs = document.querySelectorAll(".price-input");
+
+    priceInputs.forEach((input) => {
+      const originalValue = input.value;
+
+      // Only format if not already formatted and has value
+      if (originalValue && !originalValue.includes(",")) {
+        input.setAttribute("data-original-value", originalValue);
+        input.value = formatCurrency(originalValue);
+      }
+    });
+  }
+
+  // Format price on input change - Updated version
+  function setupPriceFormatting() {
+    const priceInputs = document.querySelectorAll(".price-input");
+
+    priceInputs.forEach((input) => {
+      // Store original numeric value as data attribute
+      if (input.value && !input.getAttribute("data-original-value")) {
+        input.setAttribute("data-original-value", input.value.replace(/[^\d]/g, ""));
+      }
+
+      // Format on focus out (blur)
+      input.addEventListener("blur", function (e) {
+        const value = e.target.value.replace(/[^\d]/g, "");
+        if (value) {
+          e.target.setAttribute("data-original-value", value);
+          e.target.value = formatCurrency(value);
+        }
+      });
+
+      // Remove formatting on focus (for editing)
+      input.addEventListener("focus", function (e) {
+        const originalValue = e.target.getAttribute("data-original-value") || 
+                             e.target.value.replace(/[^\d]/g, "");
+        e.target.value = originalValue;
+      });
+
+      // Format on input (real-time)
+      input.addEventListener("input", function (e) {
+        let value = e.target.value.replace(/[^\d]/g, "");
+        if (value.length > 0) {
+          e.target.setAttribute("data-original-value", value);
+          // Add temporary formatting while typing
+          const cursorPosition = e.target.selectionStart;
+          const formattedValue = formatCurrency(value);
+          e.target.value = formattedValue;
+
+          // Restore cursor position (approximately)
+          const newPosition =
+            cursorPosition + (formattedValue.length - value.length);
+          e.target.setSelectionRange(newPosition, newPosition);
+        }
+      });
+    });
+  }
+
+  // Function to restore numeric values before form submission
+  function restoreNumericValues() {
+    const priceInputs = document.querySelectorAll(".price-input");
+    priceInputs.forEach((input) => {
+      const originalValue = input.getAttribute("data-original-value") ||
+                           input.value.replace(/[^\d]/g, "");
+      input.value = originalValue;
+    });
+  }
+
+  // Format all price inputs - Updated version
+  function formatAllPrices() {
+    const priceInputs = document.querySelectorAll(".price-input");
+
+    priceInputs.forEach((input) => {
+      const originalValue = input.value;
+
+      // Only format if not already formatted and has value
+      if (originalValue && !originalValue.includes(",")) {
+        input.setAttribute("data-original-value", originalValue);
+        input.value = formatCurrency(originalValue);
+      }
+    });
+  }
+
+  // Initialize formatting when modal opens
+  function initMenuModal() {
+    formatAllPrices();
+    setupPriceFormatting();
+  }
+
+  // Observer to detect when modal content changes
+  const observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      if (mutation.type === "childList" || mutation.type === "attributes") {
+        const modal = document.getElementById("menuModal");
+        if (modal && !modal.classList.contains("hidden")) {
+          setTimeout(initMenuModal, 100); // Small delay to ensure DOM is ready
+        }
+      }
+    });
+  });
+
+  // Start observing
+  const targetNode = document.body;
+  observer.observe(targetNode, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+
+  // Initial setup
+  initMenuModal();
+
+  // Make functions available globally if needed
+  window.formatMenuPrices = formatAllPrices;
 });

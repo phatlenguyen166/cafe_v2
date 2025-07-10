@@ -26,8 +26,8 @@
             ></span
           >
         </div>
-        <button
-          type="button"
+        <a
+          href="/sale"
           id="closePaymentModal"
           class="text-gray-400 hover:text-red-500 transition"
           title="Đóng"
@@ -45,7 +45,7 @@
               d="M6 18L18 6M6 6l12 12"
             />
           </svg>
-        </button>
+        </a>
       </div>
       <div class="mb-4">
         <table class="w-full border mb-2 text-sm bg-gray-50 rounded">
@@ -71,7 +71,10 @@
               >
                 SL
               </td>
-              <td class="border px-2 py-1 text-right" th:text="${detail.price}">
+              <td
+                class="border px-2 py-1 text-right price-input"
+                th:text="${detail.price}"
+              >
                 0 đ
               </td>
               <td

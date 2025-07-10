@@ -7,6 +7,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Trang cá nhân</title>
+    <script th:src="@{/js/account/account.js}" defer></script>
   </head>
   <body>
     <div
@@ -210,6 +211,7 @@
                         >Lương cơ bản</label
                       >
                       <input
+                        id="salaryDisplay"
                         type="text"
                         th:value="${session.user.employee.position.salary}"
                         class="w-full px-3 py-2 text-sm border border-cyan-200 rounded-md bg-cyan-50 text-cyan-800 font-medium"
@@ -273,7 +275,7 @@
                         <input
                           id="passwordField"
                           type="password"
-                          placeholder="••••••••"
+                          value="••••••••"
                           class="w-full px-3 py-2 text-sm border border-slate-200 rounded-md bg-slate-50 text-slate-800 font-medium pr-8"
                           readonly
                         />
@@ -281,8 +283,10 @@
                           type="button"
                           onclick="togglePassword()"
                           class="absolute right-2 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                          title="Ẩn/hiện mật khẩu"
                         >
                           <svg
+                            id="eyeIcon"
                             class="w-4 h-4"
                             fill="none"
                             stroke="currentColor"

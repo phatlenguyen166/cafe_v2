@@ -13,6 +13,7 @@ import com.viettridao.cafe.model.EmployeeEntity;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<EmployeeEntity, Integer> {
+
     boolean existsByPhoneNumber(String phoneNumber);
 
     Optional<EmployeeEntity> findByPhoneNumber(String phoneNumber);

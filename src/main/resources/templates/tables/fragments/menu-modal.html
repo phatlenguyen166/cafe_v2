@@ -42,10 +42,9 @@
               <td class="border px-2 py-1 text-center">
                 <input
                   type="number"
-                  min="0"
-                  step="1000"
+                  disabled
                   th:value="${item.currentPrice}"
-                  class="menu-price w-20 border rounded px-1 py-0.5"
+                  class="menu-price price-input w-20 border rounded px-1 py-0.5"
                   th:data-index="${iter.index}"
                 />
               </td>

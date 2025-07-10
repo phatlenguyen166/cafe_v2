@@ -1,5 +1,6 @@
 package com.viettridao.cafe.dto.request.menu_item;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import jakarta.validation.constraints.*;
@@ -14,7 +15,7 @@ public class MenuItemRequest {
 
     @NotNull(message = "Giá tiền không được để trống")
     @Min(value = 0, message = "Giá tiền phải lớn hơn hoặc bằng 0")
-    private Double currentPrice;
+    private BigDecimal currentPrice;
 
     private Boolean isDeleted = false;
 

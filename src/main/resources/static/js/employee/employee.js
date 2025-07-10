@@ -2,6 +2,71 @@
 document.addEventListener("DOMContentLoaded", function () {
   console.log("Employee validation loaded");
 
+  // Format currency function
+  function formatCurrency(amount) {
+    if (!amount || amount === 0) return "0 ₫";
+
+    // Remove any non-digit characters
+    const numericAmount = amount.toString().replace(/[^\d]/g, "");
+
+    if (!numericAmount) return "0 ₫";
+
+    // Format with Vietnamese locale
+    return parseInt(numericAmount).toLocaleString("vi-VN") + " ₫";
+  }
+
+  // Format all salary amounts in the table
+  function formatAllSalaries() {
+    const salaryElements = document.querySelectorAll(".salary-amount");
+
+    salaryElements.forEach((element) => {
+      const originalValue = element.textContent.trim();
+
+      // Skip if already formatted or empty
+      if (originalValue.includes("₫") || !originalValue) {
+        return;
+      }
+
+      const formattedValue = formatCurrency(originalValue);
+      element.textContent = formattedValue;
+    });
+  }
+
+  // Format salaries when page loads
+  formatAllSalaries();
+
+  // Observer to format salaries when content changes dynamically
+  const observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      if (mutation.type === "childList") {
+        // Check if new salary elements were added
+        const addedNodes = Array.from(mutation.addedNodes);
+        addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const salaryElements = node.querySelectorAll
+              ? node.querySelectorAll(".salary-amount")
+              : [];
+            salaryElements.forEach((element) => {
+              const originalValue = element.textContent.trim();
+              if (!originalValue.includes("₫") && originalValue) {
+                element.textContent = formatCurrency(originalValue);
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+
+  // Start observing the table for changes
+  const tableBody = document.getElementById("employeeTableBody");
+  if (tableBody) {
+    observer.observe(tableBody, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
   // Update salary when position changes
   function updateSalary(selectElement) {
     const selectedOption = selectElement.options[selectElement.selectedIndex];
@@ -12,13 +77,53 @@ document.addEventListener("DOMContentLoaded", function () {
       if (salary && salary !== "") {
         salaryInput.value = salary;
         // Format display
-        const formattedSalary = parseInt(salary).toLocaleString("vi-VN");
-        salaryInput.setAttribute("title", formattedSalary + " ₫");
+        const formattedSalary = formatCurrency(salary);
+        salaryInput.setAttribute("title", formattedSalary);
+
+        // Update display if there's a salary display element
+        const salaryDisplay = document.querySelector(".salary-display");
+        if (salaryDisplay) {
+          salaryDisplay.textContent = formattedSalary;
+        }
       } else {
         salaryInput.value = "";
         salaryInput.setAttribute("title", "");
+        const salaryDisplay = document.querySelector(".salary-display");
+        if (salaryDisplay) {
+          salaryDisplay.textContent = "0 ₫";
+        }
       }
     }
+  }
+
+  // Make updateSalary available globally
+  window.updateSalary = updateSalary;
+
+  // Format salary display on input
+  if (salaryInput) {
+    salaryInput.addEventListener("input", function (e) {
+      let value = e.target.value.replace(/\D/g, "");
+      if (value) {
+        const formatted = formatCurrency(value);
+        e.target.setAttribute("title", formatted);
+
+        // Update display element if exists
+        const salaryDisplay = document.querySelector(".salary-display");
+        if (salaryDisplay) {
+          salaryDisplay.textContent = formatted;
+        }
+      }
+    });
+
+    // Format on blur
+    salaryInput.addEventListener("blur", function (e) {
+      let value = e.target.value.replace(/\D/g, "");
+      if (value) {
+        e.target.value = value; // Keep numeric value for form submission
+        const formatted = formatCurrency(value);
+        e.target.setAttribute("title", formatted);
+      }
+    });
   }
 
   // Make updateSalary available globally
@@ -30,8 +135,24 @@ document.addEventListener("DOMContentLoaded", function () {
     salaryInput.addEventListener("input", function (e) {
       let value = e.target.value.replace(/\D/g, "");
       if (value) {
-        const formatted = parseInt(value).toLocaleString("vi-VN");
-        e.target.setAttribute("title", formatted + " ₫");
+        const formatted = formatCurrency(value);
+        e.target.setAttribute("title", formatted);
+
+        // Update display element if exists
+        const salaryDisplay = document.querySelector(".salary-display");
+        if (salaryDisplay) {
+          salaryDisplay.textContent = formatted;
+        }
+      }
+    });
+
+    // Format on blur
+    salaryInput.addEventListener("blur", function (e) {
+      let value = e.target.value.replace(/\D/g, "");
+      if (value) {
+        e.target.value = value; // Keep numeric value for form submission
+        const formatted = formatCurrency(value);
+        e.target.setAttribute("title", formatted);
       }
     });
   }

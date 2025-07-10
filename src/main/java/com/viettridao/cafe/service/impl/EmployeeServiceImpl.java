@@ -7,6 +7,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,8 +35,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final PositionRepository positionRepository;
 
     @Override
-    public List<EmployeeEntity> getAllEmployees() {
-        return employeeRepository.findAll();
+    public Page<SearchEmployeeResponse> getAllEmployees(Pageable pageable) {
+        return employeeRepository.findAll(pageable)
+                .map(employee -> new SearchEmployeeResponse(
+                        employee.getId(),
+                        employee.getFullName(),
+                        employee.getPosition().getPositionName(),
+                        employee.getPosition().getSalary()));
     }
 
     @Override
