@@ -38,26 +38,20 @@ public class EquipmentController extends BaseController {
             @RequestParam(value = "size", defaultValue = "5") int size,
             Model model) {
 
-        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
-            // Tìm kiếm thiết bị theo từ khóa (không phân trang)
-            // Bạn cần implement method searchByName trong EquipmentService
-            // List<EquipmentResponse> equipments =
-            // equipmentService.searchByName(searchKeyword.trim());
-            model.addAttribute("searchKeyword", searchKeyword);
-            model.addAttribute("isSearchResult", true);
-            // model.addAttribute("listEquipment", equipments);
-        } else {
-            // Lấy tất cả thiết bị với phân trang
-            Pageable pageable = PageRequest.of(page, size);
-            Page<EquipmentResponse> equipmentPage = equipmentService.getAllEquipments(pageable);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<EquipmentResponse> equipmentPage;
+        boolean isSearchResult = searchKeyword != null && !searchKeyword.trim().isEmpty();
 
-            model.addAttribute("isSearchResult", false);
-            model.addAttribute("listEquipment", equipmentPage.getContent());
-            model.addAttribute("equipmentPage", equipmentPage);
-            model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages", equipmentPage.getTotalPages());
-            model.addAttribute("totalElements", equipmentPage.getTotalElements());
+        if (isSearchResult) {
+            equipmentPage = equipmentService.searchByName(Pageable.unpaged(), searchKeyword.trim());
+            model.addAttribute("searchKeyword", searchKeyword.trim());
+        } else {
+            equipmentPage = equipmentService.getAllEquipments(pageable);
         }
+        model.addAttribute("isSearchResult", isSearchResult);
+        model.addAttribute("listEquipment", equipmentPage.getContent());
+        model.addAttribute("equipmentPage", equipmentPage);
+        model.addAttribute("currentPage", page);
 
         return "devices/device";
     }

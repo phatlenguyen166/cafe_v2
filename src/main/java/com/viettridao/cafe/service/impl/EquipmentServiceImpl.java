@@ -24,15 +24,23 @@ public class EquipmentServiceImpl implements EquipmentService {
     private final EquipmentMapper equipmentMapper;
 
     @Override
+    public Page<EquipmentResponse> searchByName(Pageable pageable, String keyword) {
+        return getEquipments(pageable, keyword);
+    }
+
+    @Override
     public Page<EquipmentResponse> getAllEquipments(Pageable pageable) {
-        return equipmentRepository.findAll(pageable)
-                .map(eq -> new EquipmentResponse(eq.getId(),
-                        eq.getEquipmentName(),
-                        eq.getQuantity(),
-                        eq.getPurchaseDate(),
-                        eq.getPurchasePrice(),
-                        eq.getTotalAmount(),
-                        eq.getIsDeleted()));
+        return getEquipments(pageable, null);
+    }
+
+    private Page<EquipmentResponse> getEquipments(Pageable pageable, String keyword) {
+        Page<EquipmentEntity> entities;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            entities = equipmentRepository.searchByName(pageable, keyword);
+        } else {
+            entities = equipmentRepository.findAllByIsDeletedFalse(pageable);
+        }
+        return entities.map(equipmentMapper::convertToDto);
     }
 
     @Override

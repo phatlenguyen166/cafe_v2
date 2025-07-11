@@ -11,6 +11,8 @@ import com.viettridao.cafe.model.EquipmentEntity;
 public interface EquipmentService {
     Page<EquipmentResponse> getAllEquipments(Pageable pageable);
 
+    Page<EquipmentResponse> searchByName(Pageable pageable, String keyword);
+
     EquipmentEntity createEquipment(CreateEquipmentRequest request);
 
     EquipmentResponse getEquipmentById(Integer id);
