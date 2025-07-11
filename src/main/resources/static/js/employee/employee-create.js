@@ -1,161 +1,43 @@
-// Đợi DOM load hoàn toàn
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("Employee validation loaded");
-
-  // Format currency function
-  function formatCurrency(amount) {
-    if (!amount || amount === 0) return "0 ₫";
-
-    // Remove any non-digit characters
-    const numericAmount = amount.toString().replace(/[^\d]/g, "");
-
-    if (!numericAmount) return "0 ₫";
-
-    // Format with Vietnamese locale
-    return parseInt(numericAmount).toLocaleString("vi-VN") + " ₫";
-  }
-
-  // Format all salary amounts in the table
-  function formatAllSalaries() {
-    const salaryElements = document.querySelectorAll(".salary-amount");
-
-    salaryElements.forEach((element) => {
-      const originalValue = element.textContent.trim();
-
-      // Skip if already formatted or empty
-      if (originalValue.includes("₫") || !originalValue) {
-        return;
-      }
-
-      const formattedValue = formatCurrency(originalValue);
-      element.textContent = formattedValue;
-    });
-  }
-
-  // Format salaries when page loads
-  formatAllSalaries();
-
-  // Observer to format salaries when content changes dynamically
-  const observer = new MutationObserver(function (mutations) {
-    mutations.forEach(function (mutation) {
-      if (mutation.type === "childList") {
-        // Check if new salary elements were added
-        const addedNodes = Array.from(mutation.addedNodes);
-        addedNodes.forEach((node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            const salaryElements = node.querySelectorAll
-              ? node.querySelectorAll(".salary-amount")
-              : [];
-            salaryElements.forEach((element) => {
-              const originalValue = element.textContent.trim();
-              if (!originalValue.includes("₫") && originalValue) {
-                element.textContent = formatCurrency(originalValue);
-              }
-            });
-          }
-        });
-      }
-    });
-  });
-
-  // Start observing the table for changes
-  const tableBody = document.getElementById("employeeTableBody");
-  if (tableBody) {
-    observer.observe(tableBody, {
-      childList: true,
-      subtree: true,
-    });
-  }
+  console.log("Employee create form loaded");
 
   // Update salary when position changes
   function updateSalary(selectElement) {
     const selectedOption = selectElement.options[selectElement.selectedIndex];
     const salary = selectedOption.getAttribute("data-salary");
-    const salaryInput = document.getElementById("salary");
 
-    if (salaryInput) {
-      if (salary && salary !== "") {
-        salaryInput.value = salary;
-        // Format display
-        const formattedSalary = formatCurrency(salary);
-        salaryInput.setAttribute("title", formattedSalary);
+    // Tìm hoặc tạo element để hiển thị lương
+    let salaryDisplay = document.getElementById("salaryDisplay");
 
-        // Update display if there's a salary display element
-        const salaryDisplay = document.querySelector(".salary-display");
-        if (salaryDisplay) {
-          salaryDisplay.textContent = formattedSalary;
-        }
-      } else {
-        salaryInput.value = "";
-        salaryInput.setAttribute("title", "");
-        const salaryDisplay = document.querySelector(".salary-display");
-        if (salaryDisplay) {
-          salaryDisplay.textContent = "0 ₫";
-        }
-      }
+    if (!salaryDisplay) {
+      // Tạo element hiển thị lương nếu chưa có
+      salaryDisplay = document.createElement("div");
+      salaryDisplay.id = "salaryDisplay";
+      salaryDisplay.className =
+        "mt-3 p-4 bg-green-50 border border-green-200 rounded-xl";
+
+      // Thêm vào sau select position
+      selectElement.parentNode.appendChild(salaryDisplay);
+    }
+
+    if (salary && salary !== "0") {
+      const formattedSalary = formatCurrency(salary);
+      salaryDisplay.innerHTML = `
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+          </svg>
+          <span class="text-green-700 font-semibold">Mức lương: ${formattedSalary}</span>
+        </div>
+      `;
+      salaryDisplay.style.display = "block";
+    } else {
+      salaryDisplay.style.display = "none";
     }
   }
 
   // Make updateSalary available globally
   window.updateSalary = updateSalary;
-
-  // Format salary display on input
-  if (salaryInput) {
-    salaryInput.addEventListener("input", function (e) {
-      let value = e.target.value.replace(/\D/g, "");
-      if (value) {
-        const formatted = formatCurrency(value);
-        e.target.setAttribute("title", formatted);
-
-        // Update display element if exists
-        const salaryDisplay = document.querySelector(".salary-display");
-        if (salaryDisplay) {
-          salaryDisplay.textContent = formatted;
-        }
-      }
-    });
-
-    // Format on blur
-    salaryInput.addEventListener("blur", function (e) {
-      let value = e.target.value.replace(/\D/g, "");
-      if (value) {
-        e.target.value = value; // Keep numeric value for form submission
-        const formatted = formatCurrency(value);
-        e.target.setAttribute("title", formatted);
-      }
-    });
-  }
-
-  // Make updateSalary available globally
-  window.updateSalary = updateSalary;
-
-  // Format salary display on input
-  const salaryInput = document.getElementById("salary");
-  if (salaryInput) {
-    salaryInput.addEventListener("input", function (e) {
-      let value = e.target.value.replace(/\D/g, "");
-      if (value) {
-        const formatted = formatCurrency(value);
-        e.target.setAttribute("title", formatted);
-
-        // Update display element if exists
-        const salaryDisplay = document.querySelector(".salary-display");
-        if (salaryDisplay) {
-          salaryDisplay.textContent = formatted;
-        }
-      }
-    });
-
-    // Format on blur
-    salaryInput.addEventListener("blur", function (e) {
-      let value = e.target.value.replace(/\D/g, "");
-      if (value) {
-        e.target.value = value; // Keep numeric value for form submission
-        const formatted = formatCurrency(value);
-        e.target.setAttribute("title", formatted);
-      }
-    });
-  }
 
   // Auto-generate username from full name
   const fullNameInput = document.getElementById("fullName");
@@ -169,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .replace(/đ/g, "d")
         .replace(/[^a-z0-9\s]/g, "")
         .replace(/\s+/g, "")
-        .substring(0, 20); // Giới hạn độ dài username
+        .substring(0, 20);
 
       const usernameInput = document.getElementById("username");
       if (usernameInput) {
@@ -178,10 +60,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Phone number validation - simplified version
+  // Phone number validation
   function validatePhoneNumber(phoneNumber) {
     const cleanPhone = phoneNumber.replace(/[\s\-\(\)]/g, "");
-    // Kiểm tra: bắt đầu bằng 0 và có đúng 10 chữ số
     const phoneRegex = /^0\d{9}$/;
     return phoneRegex.test(cleanPhone);
   }
@@ -189,7 +70,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // Format phone number display
   function formatPhoneNumber(input) {
     let value = input.value.replace(/\D/g, "");
-    // Giới hạn tối đa 10 chữ số
     if (value.length > 10) {
       value = value.substring(0, 10);
     }
@@ -211,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
     input.value = value;
   }
 
-  // Password strength validation
+  // Validation functions
   function validatePassword(password) {
     if (password.length < 6) {
       return { valid: false, message: "Mật khẩu phải có ít nhất 6 ký tự" };
@@ -219,7 +99,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return { valid: true, message: "Mật khẩu hợp lệ" };
   }
 
-  // Username validation
   function validateUsername(username) {
     if (username.length < 3) {
       return { valid: false, message: "Tên đăng nhập phải có ít nhất 3 ký tự" };
@@ -233,7 +112,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return { valid: true, message: "Tên đăng nhập hợp lệ" };
   }
 
-  // Full name validation
   function validateFullName(fullName) {
     if (fullName.trim().length < 2) {
       return { valid: false, message: "Họ tên phải có ít nhất 2 ký tự" };
@@ -250,7 +128,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return { valid: true, message: "Họ tên hợp lệ" };
   }
 
-  // Address validation
   function validateAddress(address) {
     if (address.trim().length < 5) {
       return { valid: false, message: "Địa chỉ phải có ít nhất 5 ký tự" };
@@ -259,6 +136,27 @@ document.addEventListener("DOMContentLoaded", function () {
       return { valid: false, message: "Địa chỉ không được quá 100 ký tự" };
     }
     return { valid: true, message: "Địa chỉ hợp lệ" };
+  }
+
+  // Show validation messages
+  function showValidationMessage(input, isValid, message) {
+    const existingError = input.parentNode.querySelector(".error-message");
+    if (existingError) {
+      existingError.remove();
+    }
+
+    if (!isValid) {
+      input.style.borderColor = "#ef4444";
+      input.style.backgroundColor = "#fef2f2";
+
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "error-message text-red-500 text-sm mt-1";
+      errorDiv.textContent = message;
+      input.parentNode.appendChild(errorDiv);
+    } else {
+      input.style.borderColor = "#10b981";
+      input.style.backgroundColor = "#f0fdf4";
+    }
   }
 
   // Real-time validation
@@ -301,35 +199,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Real-time validation for address
   const addressInput = document.getElementById("address");
   if (addressInput) {
     addressInput.addEventListener("blur", function (e) {
       const validation = validateAddress(e.target.value);
       showValidationMessage(e.target, validation.valid, validation.message);
     });
-  }
-
-  // Show validation messages
-  function showValidationMessage(input, isValid, message) {
-    // Remove existing error message
-    const existingError = input.parentNode.querySelector(".error-message");
-    if (existingError) {
-      existingError.remove();
-    }
-
-    if (!isValid) {
-      input.style.borderColor = "#ef4444";
-      input.style.backgroundColor = "#fef2f2";
-
-      const errorDiv = document.createElement("div");
-      errorDiv.className = "error-message text-red-500 text-sm mt-1";
-      errorDiv.textContent = message;
-      input.parentNode.appendChild(errorDiv);
-    } else {
-      input.style.borderColor = "#10b981";
-      input.style.backgroundColor = "#f0fdf4";
-    }
   }
 
   // Form submission validation
@@ -339,7 +214,6 @@ document.addEventListener("DOMContentLoaded", function () {
       let isValid = true;
       const errors = [];
 
-      // Validate all required fields
       const requiredFields = [
         "fullName",
         "phoneNumber",
