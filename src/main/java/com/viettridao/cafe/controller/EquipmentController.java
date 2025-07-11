@@ -2,6 +2,9 @@ package com.viettridao.cafe.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.viettridao.cafe.dto.request.equipment.CreateEquipmentRequest;
@@ -28,9 +32,33 @@ public class EquipmentController extends BaseController {
     private final EquipmentService equipmentService;
 
     @GetMapping("/device")
-    public String showDevice(Model model) {
-        List<EquipmentResponse> listEquipment = equipmentService.getAllEquipments();
-        model.addAttribute("listEquipment", listEquipment);
+    public String showDevice(
+            @RequestParam(value = "search", required = false) String searchKeyword,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "5") int size,
+            Model model) {
+
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            // Tìm kiếm thiết bị theo từ khóa (không phân trang)
+            // Bạn cần implement method searchByName trong EquipmentService
+            // List<EquipmentResponse> equipments =
+            // equipmentService.searchByName(searchKeyword.trim());
+            model.addAttribute("searchKeyword", searchKeyword);
+            model.addAttribute("isSearchResult", true);
+            // model.addAttribute("listEquipment", equipments);
+        } else {
+            // Lấy tất cả thiết bị với phân trang
+            Pageable pageable = PageRequest.of(page, size);
+            Page<EquipmentResponse> equipmentPage = equipmentService.getAllEquipments(pageable);
+
+            model.addAttribute("isSearchResult", false);
+            model.addAttribute("listEquipment", equipmentPage.getContent());
+            model.addAttribute("equipmentPage", equipmentPage);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", equipmentPage.getTotalPages());
+            model.addAttribute("totalElements", equipmentPage.getTotalElements());
+        }
+
         return "devices/device";
     }
 

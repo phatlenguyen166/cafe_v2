@@ -1,5 +1,7 @@
 package com.viettridao.cafe.dto.request.equipment;
 
+import java.math.BigDecimal;
+
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
@@ -22,9 +24,9 @@ public class UpdateEquipmentRequest {
     private String equipmentName;
 
     @NotNull(message = "Giá mua không được để trống")
-    @DecimalMin(value = "1000.0", message = "Giá mua phải ít nhất 1.000 VNĐ")
-    @DecimalMax(value = "1000000000.0", message = "Giá mua không được quá 1 tỷ VNĐ")
-    private Double purchasePrice;
+    @DecimalMin(value = "1000", message = "Giá mua phải ít nhất 1.000 VNĐ")
+    @DecimalMax(value = "1000000000", message = "Giá mua không được quá 1 tỷ VNĐ")
+    private BigDecimal purchasePrice;
 
     @NotNull(message = "Số lượng không được để trống")
     @Min(value = 1, message = "Số lượng phải lớn hơn 0")

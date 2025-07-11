@@ -1,7 +1,9 @@
 package com.viettridao.cafe.service.impl;
 
-import java.util.List;
+import java.math.BigDecimal;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.viettridao.cafe.dto.request.equipment.CreateEquipmentRequest;
@@ -22,16 +24,22 @@ public class EquipmentServiceImpl implements EquipmentService {
     private final EquipmentMapper equipmentMapper;
 
     @Override
-    public List<EquipmentResponse> getAllEquipments() {
-        return equipmentRepository.findAll().stream()
-                .map(equipmentMapper::convertToDto)
-                .toList();
+    public Page<EquipmentResponse> getAllEquipments(Pageable pageable) {
+        return equipmentRepository.findAll(pageable)
+                .map(eq -> new EquipmentResponse(eq.getId(),
+                        eq.getEquipmentName(),
+                        eq.getQuantity(),
+                        eq.getPurchaseDate(),
+                        eq.getPurchasePrice(),
+                        eq.getTotalAmount(),
+                        eq.getIsDeleted()));
     }
 
     @Override
     public EquipmentEntity createEquipment(CreateEquipmentRequest request) {
         // Tạo entity mới từ request
         EquipmentEntity equipment = equipmentMapper.convertToEntity(request);
+        equipment.setTotalAmount(request.getPurchasePrice().multiply(BigDecimal.valueOf(request.getQuantity())));
         return equipmentRepository.save(equipment);
 
     }
@@ -59,7 +67,6 @@ public class EquipmentServiceImpl implements EquipmentService {
         equipment.setEquipmentName(editEquipmentRequest.getEquipmentName());
         equipment.setPurchasePrice(editEquipmentRequest.getPurchasePrice());
         equipment.setQuantity(editEquipmentRequest.getQuantity());
-        equipment.setNotes(editEquipmentRequest.getNotes());
         // equipment.setPurchaseDate(editEquipmentRequest.getPurchaseDate());
 
         // Lưu lại vào DB
