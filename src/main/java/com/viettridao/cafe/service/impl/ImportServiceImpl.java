@@ -38,7 +38,7 @@ public class ImportServiceImpl implements ImportService {
         importEntity.setIsDeleted(false);
         importEntity.setEmployee(employee);
         importEntity.setProduct(product);
-        importEntity.setTotalAmount(product.getPrice() * request.getQuantity());
+        importEntity.setTotalAmount(product.getPrice().multiply(java.math.BigDecimal.valueOf(request.getQuantity())));
 
         product.setQuantity(product.getQuantity() + request.getQuantity());
         productRepository.save(product);
