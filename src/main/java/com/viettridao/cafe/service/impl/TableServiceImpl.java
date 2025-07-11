@@ -1,5 +1,6 @@
 package com.viettridao.cafe.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -106,17 +107,19 @@ public class TableServiceImpl implements TableService {
                 // 4.1. Cập nhật lại tổng tiền cho hóa đơn mới (bàn đích)
                 List<InvoiceDetailEntity> targetDetails = invoiceDetailRepository
                                 .findByInvoiceId(targetInvoice.getId());
-                double targetTotal = 0.0;
+                BigDecimal targetTotal = BigDecimal.ZERO;
                 for (InvoiceDetailEntity detail : targetDetails) {
-                        targetTotal += detail.getQuantity() * detail.getPrice();
+                        targetTotal = targetTotal.add(
+                                        BigDecimal.valueOf(detail.getQuantity()).multiply(detail.getPrice()));
                 }
                 targetInvoice.setTotalAmount(targetTotal);
                 invoiceRepository.save(targetInvoice);
 
                 // 4.2. Cập nhật lại tổng tiền cho hóa đơn nguồn (bàn nguồn)
-                double sourceTotal = 0.0;
+                BigDecimal sourceTotal = BigDecimal.ZERO;
                 for (InvoiceDetailEntity detail : sourceInvoice.getInvoiceDetails()) {
-                        sourceTotal += detail.getQuantity() * detail.getPrice();
+                        sourceTotal = sourceTotal.add(
+                                        BigDecimal.valueOf(detail.getQuantity()).multiply(detail.getPrice()));
                 }
                 sourceInvoice.setTotalAmount(sourceTotal);
                 invoiceRepository.save(sourceInvoice);
@@ -156,7 +159,7 @@ public class TableServiceImpl implements TableService {
                                 sourceReservations,
                                 isTargetAvailable);
 
-                double totalAmount = calculateTotalAmount(sourceTables, sourceInvoices, isTargetAvailable,
+                BigDecimal totalAmount = calculateTotalAmount(sourceTables, sourceInvoices, isTargetAvailable,
                                 targetTableId,
                                 targetInvoice);
                 targetInvoice.setTotalAmount(totalAmount);
@@ -337,13 +340,13 @@ public class TableServiceImpl implements TableService {
                 }
         }
 
-        private double calculateTotalAmount(
+        private BigDecimal calculateTotalAmount(
                         List<TableEntity> sourceTables,
                         Map<TableEntity, InvoiceEntity> sourceInvoices,
                         boolean isTargetAvailable,
                         Integer targetTableId,
                         InvoiceEntity targetInvoice) {
-                double totalAmount = 0.0;
+                BigDecimal totalAmount = BigDecimal.ZERO;
                 for (TableEntity source : sourceTables) {
                         InvoiceEntity sourceInvoice = sourceInvoices.get(source);
                         // Nếu là bàn đích và không phải bàn trống thì bỏ qua (vì hóa đơn đích sẽ giữ
@@ -351,12 +354,12 @@ public class TableServiceImpl implements TableService {
                         if (!isTargetAvailable && source.getId().equals(targetTableId))
                                 continue;
                         if (sourceInvoice != null && sourceInvoice.getTotalAmount() != null) {
-                                totalAmount += sourceInvoice.getTotalAmount();
+                                totalAmount = totalAmount.add(sourceInvoice.getTotalAmount());
                         }
                 }
                 // Nếu bàn đích là một trong các bàn nguồn, cộng thêm tổng tiền hóa đơn đích cũ
                 if (!isTargetAvailable && targetInvoice.getTotalAmount() != null) {
-                        totalAmount += targetInvoice.getTotalAmount();
+                        totalAmount = totalAmount.add(targetInvoice.getTotalAmount());
                 }
                 return totalAmount;
         }

@@ -1,5 +1,6 @@
 package com.viettridao.cafe.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
@@ -78,7 +79,7 @@ public class InvoiceDetailServiceImpl implements InvoiceDetailService {
         table.setStatus(TableStatus.OCCUPIED);
         tableRepository.save(table);
 
-        double totalAmount = 0.0;
+        BigDecimal totalAmount = BigDecimal.ZERO;
 
         for (InvoiceDetailRequest invoiceDetailRequest : request.getInvoiceDetails()) {
             InvoiceKey key = new InvoiceKey(invoice.getId(), invoiceDetailRequest.getMenuItemId());
@@ -104,14 +105,15 @@ public class InvoiceDetailServiceImpl implements InvoiceDetailService {
                 invoiceDetailRepository.save(invoiceDetail);
             }
             // Cộng dồn tổng tiền
-            totalAmount += invoiceDetailRequest.getQuantity() * invoiceDetailRequest.getPrice();
+            totalAmount = totalAmount.add(
+                    invoiceDetailRequest.getPrice().multiply(BigDecimal.valueOf(invoiceDetailRequest.getQuantity())));
         }
 
         // Cập nhật tổng tiền hóa đơn
         if (invoice.getTotalAmount() == null) {
             invoice.setTotalAmount(totalAmount);
         } else {
-            invoice.setTotalAmount(invoice.getTotalAmount() + totalAmount);
+            invoice.setTotalAmount(invoice.getTotalAmount().add(totalAmount));
         }
         invoiceRepository.save(invoice);
     }

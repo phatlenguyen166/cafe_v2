@@ -1,4 +1,5 @@
 <div th:fragment="payment-modal">
+  <script th:src="@{/js/table/payment.js}"></script>
   <div
     id="paymentModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
@@ -72,20 +73,22 @@
                 SL
               </td>
               <td
-                class="border px-2 py-1 text-right price-input"
+                class="border px-2 py-1 text-right currency-display"
                 th:text="${detail.price}"
+                th:data-value="${detail.price}"
               >
                 0 đ
               </td>
               <td
-                class="border px-2 py-1 text-right"
+                class="border px-2 py-1 text-right currency-display total-price"
                 th:text="${detail.quantity * detail.price}"
+                th:data-value="${detail.quantity * detail.price}"
               >
                 0 đ
               </td>
             </tr>
             <tr th:if="${#lists.isEmpty(invoiceDetails)}">
-              <td colspan="3" class="text-center text-gray-400 py-2">
+              <td colspan="4" class="text-center text-gray-400 py-2">
                 Chưa có món nào
               </td>
             </tr>
@@ -94,9 +97,10 @@
         <div class="flex justify-end font-semibold text-base">
           Tổng:
           <span
-            class="ml-2 text-blue-700"
+            class="ml-2 text-blue-700 currency-display"
             id="paymentTotal"
-            th:text="${#numbers.formatDecimal(paymentTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"
+            th:text="${paymentTotal}"
+            th:data-value="${paymentTotal}"
             >0 đ</span
           >
         </div>

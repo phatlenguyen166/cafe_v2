@@ -1,5 +1,7 @@
 package com.viettridao.cafe.service.impl;
 
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Service;
 
 import com.viettridao.cafe.common.InvoiceStatus;
@@ -84,7 +86,7 @@ public class ReservationServiceImpl implements ReservationService {
 
             // Tạo hóa đơn rỗng
             InvoiceEntity invoice = new InvoiceEntity();
-            invoice.setTotalAmount(0.0);
+            invoice.setTotalAmount(BigDecimal.ZERO);
             invoice.setCreatedAt(request.getReservationDate());
             invoice.setStatus(InvoiceStatus.UNPAID);
             invoice.setIsDeleted(false);
