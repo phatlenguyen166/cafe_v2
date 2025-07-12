@@ -69,7 +69,13 @@ jobs:
             java -version
 
             echo "3. Dừng tiến trình ứng dụng cũ:"
-            kill -9 $(pgrep -f "java -jar target/cafe-0.0.1-SNAPSHOT.jar") || true
+            PID=$(ps -ef | grep cafe-0.0.1-SNAPSHOT.jar | grep -v grep | awk '{print $2}')
+            if [ -n "$PID" ]; then
+              echo "🔴 Tiến trình đang chạy: $PID"
+              kill -9 $PID || true
+            else
+              echo "✅ Không có tiến trình Java nào đang chạy."
+            fi
 
             # echo "4. Tìm và khởi động file JAR mới:"
             # Tìm file .jar mới nhất để tránh lỗi nếu có nhiều file
