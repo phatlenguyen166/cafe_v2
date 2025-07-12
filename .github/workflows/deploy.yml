@@ -70,10 +70,10 @@ jobs:
 
             # echo "3. Dừng tiến trình ứng dụng cũ:"
             # Dừng tiến trình cũ một cách an toàn và không gây lỗi cho workflow
-            pkill -f "java -jar target/cafe-0.0.1-SNAPSHOT.jar"
-            sleep 5 # Chờ 5 giây để đảm bảo port được giải phóng
+            # pkill -f "java -jar target/cafe-0.0.1-SNAPSHOT.jar"
+            # sleep 5 # Chờ 5 giây để đảm bảo port được giải phóng
 
-            echo "4. Tìm và khởi động file JAR mới:"
+            # echo "4. Tìm và khởi động file JAR mới:"
             # Tìm file .jar mới nhất để tránh lỗi nếu có nhiều file
             # JAR_FILE=$(ls -t *.jar | head -n 1)
             # if [ -z "$JAR_FILE" ]
